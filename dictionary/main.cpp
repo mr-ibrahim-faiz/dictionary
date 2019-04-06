@@ -8,14 +8,16 @@ try
 {
 	// creates required files
 	create_file_if(dictionary_filename);
-	// create_file_if(practice_filename_left);
-	// create_file_if(practice_filename_right);
+	set_practice_file();
 
 	// retrieves dictionary information from file
 	Dictionary dictionary = get_words_and_translations();
 	vector<string>& words_left =  dictionary.words_left;
 	vector<string>& words_right =  dictionary.words_right;
-	
+
+	// retrieves practice information from file
+	Practice practice = get_practice_information();
+
 	// displays main menu
 	display_menu();
 
@@ -25,13 +27,16 @@ try
 		else {
 			// retrieves dictionary information from file
 			dictionary = get_words_and_translations();
+
+			// retrieves practice information from file
+			practice = get_practice_information();
 		}
 
 		switch (choice[0]) {
 		case '1':
 			cout << newline;
 			if(!words_left.empty() && words_left.size() == words_right.size()){
-				quiz_launcher(dictionary, Dictionary::Mode::normal);
+				quiz_launcher(dictionary, practice, Dictionary::Mode::normal);
 			}
 			else {
 				if(words_left.empty()) cout << "There's not a single word to display.\n";
@@ -42,13 +47,37 @@ try
 		case '2':
             cout << newline;
             if(!words_left.empty() && words_left.size() == words_right.size()){
-                quiz_launcher(dictionary, Dictionary::Mode::reverse);
+                quiz_launcher(dictionary, practice, Dictionary::Mode::reverse);
             }
             else {
                 if(words_left.empty()) cout << "There's not a single word to display.\n";
                 else cout << "The number of words doesn't match.\n";
             }
 			break;
+
+        case '3':
+            cout << newline;
+            if(!words_left.empty() && words_left.size() == words_right.size()){
+				if(!practice.indexes_left.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::practice_normal);
+				else cout << "The practice list is empty.\n";
+            }
+            else {
+                if(words_left.empty()) cout << "There's not a single word to display.\n";
+                else cout << "The number of words doesn't match.\n";
+            }
+            break;
+
+        case '4':
+            cout << newline;
+            if(!words_left.empty() && words_left.size() == words_right.size()){
+                if(!practice.indexes_right.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::practice_reverse);
+				else cout << "The practice list is empty.\n";
+            }
+            else {
+                if(words_left.empty()) cout << "There's not a single word to display.\n";
+                else cout << "The number of words doesn't match.\n";
+            }
+            break;
 
 		case exit_character:
 			break;

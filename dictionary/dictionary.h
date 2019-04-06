@@ -26,13 +26,13 @@ constexpr char newline { '\n' };
 constexpr char whitespace { ' ' };
 constexpr char file_delimiter { ':' };
 constexpr char exit_character { 'x' };
+constexpr char end_of_line { '$' };
 
 const string INVALID_CHOICE = "0";
 
 // file names
 const string dictionary_filename { "dictionary.txt" };
-const string practice_filename_left { "practice_left.txt" };
-const string practice_filename_right { "practice_right.txt" };
+const string practice_filename { "practice.txt" };
 
 // user-defined type Dictionary
 struct Dictionary {
@@ -53,12 +53,27 @@ struct Dictionary {
 
 	// Modes
     enum class Mode {
-        normal, reverse
+        normal, reverse, practice_normal, practice_reverse
     };
+};
+
+// user-defined type Practice
+struct Practice {
+	// default constructor
+	Practice() noexcept
+		: indexes_left{}
+		, indexes_right{}{}
+
+	// retry indexes
+	vector<size_t> indexes_left;
+	vector<size_t> indexes_right;
 };
 
 // retrieves dictionaory information from file
 Dictionary get_words_and_translations();
+
+// retrieves practice information from file
+Practice get_practice_information();
 
 // shuffles elements of a container
 template<typename InputIterator>
@@ -71,6 +86,12 @@ void shuffle_elements(InputIterator first, InputIterator last)
 
 // creates file if it doesn't exit
 void create_file_if(const string&);
+
+// sets practice file
+void set_practice_file();
+
+// updates practice file
+void update_practice_file(const Practice&);
 
 // writes elements of a container on a file
 template<typename InputIterator>
@@ -113,5 +134,8 @@ const vector<string>& get_words_right(const Dictionary&, const Dictionary::Mode&
 // gets length of a word
 size_t get_length(const string&);
 
+// gets indexes
+vector<size_t> get_indexes(const Dictionary&, const Practice&, const Dictionary::Mode&);
+
 // quiz launcher
-size_t quiz_launcher(const Dictionary&, const Dictionary::Mode&);
+size_t quiz_launcher(const Dictionary&, const Practice&, const Dictionary::Mode&);

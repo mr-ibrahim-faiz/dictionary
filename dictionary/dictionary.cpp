@@ -2,6 +2,10 @@
 
 #include<iostream>
 using std::ws;
+using std::streamsize;
+
+#include<limits>
+using std::numeric_limits;
 
 #include<fstream>
 using std::fstream;
@@ -50,6 +54,34 @@ Dictionary get_words_and_translations()
 	return dictionary;
 }
 
+// retrieves practice information from file
+Practice get_practice_information()
+// retrieves the indexes of questions to retry
+// Note: first retrieves the 'left_to_right' indexes then the 'right_to_left' indexes
+// syntax:
+// idx idx idx idx delimiter
+// idx idx idx idx delimiter
+{
+	Practice practice;
+	vector<size_t>& indexes_left = practice.indexes_left;
+	vector<size_t>& indexes_right = practice.indexes_right;
+
+	fstream file(practice_filename);
+	if(file.is_open()){
+		// gets indexes
+		for(size_t index = 0; file >> index; indexes_left.push_back(index));
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		for(size_t index = 0; file >> index; indexes_right.push_back(index));
+		file.clear();
+        file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		file.close();
+	}
+	return practice;
+}
+
 // creates file if it doesn't exit
 void create_file_if(const string& file_address)
 // create the file if it doesn't exit
@@ -64,6 +96,31 @@ void create_file_if(const string& file_address)
     }
 }
 
+// sets practice file
+void set_practice_file(){
+    fstream file;
+    file.open(practice_filename, ios_base::in);
+
+    if (file.is_open()) file.close();
+    else {
+        file.open(practice_filename, ios_base::out);
+        if(file.is_open()){
+			file << " $\n $";
+			file.close();
+		}
+    }
+}
+
+// updates practice file
+void update_practice_file(const Practice& practice){
+	const vector<size_t>& indexes_left = practice.indexes_left;
+	const vector<size_t>& indexes_right = practice.indexes_right;
+
+	// saves indexes
+	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, " ", " $\n");
+	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, " ", " $", ios_base::app);
+}
+
 // displays menu
 void display_menu()
 // displays main menu
@@ -75,6 +132,8 @@ void display_menu()
 
     cout << "[1] " << first_language << "-" << second_language << newline;
     cout << "[2] " << second_language << "-" << first_language << newline;
+	cout << "[3] Practice " << first_language << "-" << second_language << newline;
+    cout << "[4] Practice " << second_language << "-" << first_language << newline;
     cout << "[x] Exit" << newline;
 }
 
@@ -102,10 +161,10 @@ string get_answer()
 // gets the words to be translated
 const vector<string>& get_words_left(const Dictionary& dictionary, const Dictionary::Mode& mode){
 	switch(mode){
-	case Dictionary::Mode::normal:
+	case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
 		return dictionary.words_left;
 
-	case Dictionary::Mode::reverse:
+	case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
 		return dictionary.words_right;
 	}
 
@@ -115,10 +174,10 @@ const vector<string>& get_words_left(const Dictionary& dictionary, const Diction
 // gets the translations
 const vector<string>& get_words_right(const Dictionary& dictionary, const Dictionary::Mode& mode){
     switch(mode){
-    case Dictionary::Mode::normal:
+	case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
         return dictionary.words_right;
 
-    case Dictionary::Mode::reverse:
+	case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
         return dictionary.words_left;
     }
 
@@ -142,43 +201,104 @@ size_t get_length(const string& str)
     return length + count/2;
 }
 
+// gets indexes
+vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
+// gets indexes based on the mode
+{
+	vector<size_t> indexes;
+
+	switch(mode){
+		case Dictionary::Mode::normal: case Dictionary::Mode::reverse:
+		indexes = get_random_int_distribution(dictionary.words_left.size());
+		break;
+
+	case Dictionary::Mode::practice_normal:
+		indexes = practice.indexes_left;
+		break;
+
+	case Dictionary::Mode::practice_reverse:
+		indexes = practice.indexes_right;
+		break;
+	}
+
+	return indexes;
+}
+
 // quiz launcher
-size_t quiz_launcher(const Dictionary& dictionary, const Dictionary::Mode& mode)
+size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
 // displays a word, wait for the user's answer,
 // if the answer is wrong, displays the right answer
 {
 	// keeps track of the score
 	size_t score { 0 };
 
+	Practice practice_updated = practice;
+	vector<size_t>& indexes_left = practice_updated.indexes_left;
+	vector<size_t>& indexes_right = practice_updated.indexes_right;
+
     // retrieves dictionary information from file
     const vector<string>& words_left = get_words_left(dictionary, mode);
     const vector<string>& words_right = get_words_right(dictionary, mode);
 
-	const size_t size = words_left.size();
-	const vector<size_t> indexes = get_random_int_distribution(size);
+	const vector<size_t> indexes = get_indexes(dictionary, practice, mode);
 	size_t indexes_size = indexes.size();
 
 	for(size_t position = 0; position < indexes_size; ++position){
-		const string& word = words_left[indexes[position]];
+		const size_t& index = indexes[position];
+		const string& word = words_left[index];
 		cout << word << ": ";
 		
 		// gets user's answer
 		string user_answer = get_answer();
-		const string& right_answer = words_right[indexes[position]];
+		const string& right_answer = words_right[index];
 
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
-			// removes the word index from the practice list if present
-        	// vector<size_t>::iterator it = find(retry_indexes.begin(), retry_indexes.end(), indexes[position]);
-        	// if (it != retry_indexes.end()) retry_indexes.erase(it);
 			++score;
+
+			// removes the word index from the practice list if present
+			switch(mode){
+			case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
+			{
+				vector<size_t>::iterator it = find(indexes_left.begin(), indexes_left.end(), index);
+				if (it != indexes_left.end()) indexes_left.erase(it);
+			}
+				break;
+
+			case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
+			{
+				vector<size_t>::iterator it = find(indexes_right.begin(), indexes_right.end(), index);
+				if (it != indexes_right.end()) indexes_right.erase(it);
+			}
+				break;
+
+			default:
+				break;
+			}
 		}
 		else {
+			// updates practice indexes
+			switch(mode){
+			case Dictionary::Mode::normal:
+				indexes_left.push_back(index);
+				break;
+			
+			case Dictionary::Mode::reverse:
+				indexes_right.push_back(index);
+				break;
+
+			default:
+				break;
+			}
+
 			// displaying right answer
 			const size_t length = get_length(word);
 			for(size_t i = 0; i < length + 2; ++i) cout << whitespace;
 			cout << "\033[33m" << right_answer << newline << "\033[0m";
 		}
+
+		// updates practice file
+		update_practice_file(practice_updated);
 	}
 	return score;
 }
