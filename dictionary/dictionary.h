@@ -30,6 +30,9 @@ constexpr char end_of_line { '$' };
 
 const string INVALID_CHOICE = "0";
 
+// minimum number of words that triggers practice mmode
+constexpr size_t minimum_number_of_words { 10 };
+
 // file names
 const string dictionary_filename { "dictionary.txt" };
 const string practice_filename { "practice.txt" };
@@ -138,4 +141,4 @@ size_t get_length(const string&);
 vector<size_t> get_indexes(const Dictionary&, const Practice&, const Dictionary::Mode&);
 
 // quiz launcher
-size_t quiz_launcher(const Dictionary&, const Practice&, const Dictionary::Mode&);
+Practice quiz_launcher(const Dictionary&, const Practice&, const Dictionary::Mode&);

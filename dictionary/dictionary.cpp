@@ -130,11 +130,11 @@ void display_menu()
 	const string& first_language = dictionary.first_language;
 	const string& second_language = dictionary.second_language;
 
-    cout << "[1] " << first_language << "-" << second_language << newline;
-    cout << "[2] " << second_language << "-" << first_language << newline;
+	cout << "[1] " << first_language << "-" << second_language << newline;
+	cout << "[2] " << second_language << "-" << first_language << newline;
 	cout << "[3] Practice " << first_language << "-" << second_language << newline;
-    cout << "[4] Practice " << second_language << "-" << first_language << newline;
-    cout << "[x] Exit" << newline;
+	cout << "[4] Practice " << second_language << "-" << first_language << newline;
+	cout << "[x] Exit" << newline;
 }
 
 // gets a random distribution of unique unsigned integers
@@ -225,12 +225,12 @@ vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practic
 }
 
 // quiz launcher
-size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
+Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
 // displays a word, wait for the user's answer,
 // if the answer is wrong, displays the right answer
 {
-	// keeps track of the score
-	size_t score { 0 };
+	//// keeps track of the score
+	// size_t score { 0 };
 
 	Practice practice_updated = practice;
 	vector<size_t>& indexes_left = practice_updated.indexes_left;
@@ -244,6 +244,28 @@ size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, con
 	size_t indexes_size = indexes.size();
 
 	for(size_t position = 0; position < indexes_size; ++position){
+		// calls practice mode if necessary
+		switch(mode){
+		case Dictionary::Mode::normal:
+			if(indexes_left.size() >= minimum_number_of_words){
+				cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
+				practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_normal);
+				cout << "\n[Quiz]\n\n";
+			}
+			break;
+
+        case Dictionary::Mode::reverse:
+            if(indexes_right.size() >= minimum_number_of_words){
+                cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
+                practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_reverse);
+                cout << "\n[Quiz]\n\n";
+            }
+            break;
+
+		default:
+			break;
+		}
+
 		const size_t& index = indexes[position];
 		const string& word = words_left[index];
 		cout << word << ": ";
@@ -254,7 +276,7 @@ size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, con
 
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
-			++score;
+			//++score;
 
 			// removes the word index from the practice list if present
 			switch(mode){
@@ -280,11 +302,17 @@ size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, con
 			// updates practice indexes
 			switch(mode){
 			case Dictionary::Mode::normal:
-				indexes_left.push_back(index);
+			{
+                vector<size_t>::iterator it = find(indexes_left.begin(), indexes_left.end(), index);
+                if (it == indexes_left.end()) indexes_left.push_back(index);
+			}
 				break;
 			
 			case Dictionary::Mode::reverse:
-				indexes_right.push_back(index);
+			{
+                vector<size_t>::iterator it = find(indexes_right.begin(), indexes_right.end(), index);
+                if (it == indexes_right.end()) indexes_right.push_back(index);
+			}
 				break;
 
 			default:
@@ -300,5 +328,5 @@ size_t quiz_launcher(const Dictionary& dictionary, const Practice& practice, con
 		// updates practice file
 		update_practice_file(practice_updated);
 	}
-	return score;
+	return practice_updated;
 }
