@@ -28,6 +28,9 @@ try
 		if (choice.length() != 1) choice = INVALID_CHOICE;
 
 		char& user_choice = choice[0];
+
+		// takes care of the case where choice '3' is not available while the choice '4' is
+		// this is needed since the user has to enter '3' to select choice '4'
 		if(indexes_left.empty() && !indexes_right.empty()){
 			switch(user_choice){
 			case '3':
