@@ -120,7 +120,7 @@ void write_elements(InputIterator first, InputIterator last, const string& file_
 }
 
 // displays menu
-void display_menu();
+void display_menu(const Dictionary&, const Practice&);
 
 // gets a random distribution of unique unsigned integers
 vector<size_t> get_random_int_distribution(const size_t&);

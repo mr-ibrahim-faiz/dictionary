@@ -122,18 +122,22 @@ void update_practice_file(const Practice& practice){
 }
 
 // displays menu
-void display_menu()
+void display_menu(const Dictionary& dictionary, const Practice& practice)
 // displays main menu
 // informs the user about available choices
 {
-	Dictionary dictionary = get_words_and_translations();
 	const string& first_language = dictionary.first_language;
 	const string& second_language = dictionary.second_language;
+	const size_t& number_of_questions_left = practice.indexes_left.size();
+	const size_t& number_of_questions_right = practice.indexes_right.size();
 
 	cout << "[1] " << first_language << "-" << second_language << newline;
 	cout << "[2] " << second_language << "-" << first_language << newline;
-	cout << "[3] Practice " << first_language << "-" << second_language << newline;
-	cout << "[4] Practice " << second_language << "-" << first_language << newline;
+	if(number_of_questions_left > 0) 
+		cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
+	if(number_of_questions_right > 0) 
+		cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" 
+				<< first_language << " (" << number_of_questions_right << ")" << newline;
 	cout << "[x] Exit" << newline;
 }
 
