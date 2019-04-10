@@ -141,14 +141,12 @@ void display_menu(const Dictionary& dictionary, const Practice& practice)
 	cout << "[x] Exit" << newline;
 }
 
-// gets a random distribution of unique unsigned integers
-vector<size_t> get_random_int_distribution(const size_t& size)
-// returns a shuffled vector of unique integers ranging from 0 to size-1
+// gets a distribution of unique unsigned integers
+vector<size_t> get_int_distribution(const size_t& size)
+// returns a vector of unique integers ranging from 0 to size-1
 {
     vector<size_t> indexes;
     for (size_t i = 0; i < size; indexes.push_back(i++));
-
-    shuffle_elements(indexes.begin(), indexes.end());
 
     return indexes;
 }
@@ -208,25 +206,25 @@ size_t get_length(const string& str)
 // gets indexes
 vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
 // gets indexes based on the mode
+// the indexes are shuffled
 {
 	vector<size_t> indexes;
 
 	switch(mode){
 		case Dictionary::Mode::normal: case Dictionary::Mode::reverse:
-		indexes = get_random_int_distribution(dictionary.words_left.size());
+		indexes = get_int_distribution(dictionary.words_left.size());
 		break;
 
 	case Dictionary::Mode::practice_normal:
 		indexes = practice.indexes_left;
-		shuffle_elements(indexes.begin(), indexes.end());
 		break;
 
 	case Dictionary::Mode::practice_reverse:
 		indexes = practice.indexes_right;
-		shuffle_elements(indexes.begin(), indexes.end());
 		break;
 	}
 
+	shuffle_elements(indexes.begin(), indexes.end());
 	return indexes;
 }
 
