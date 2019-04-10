@@ -218,10 +218,12 @@ vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practic
 
 	case Dictionary::Mode::practice_normal:
 		indexes = practice.indexes_left;
+		shuffle_elements(indexes.begin(), indexes.end());
 		break;
 
 	case Dictionary::Mode::practice_reverse:
 		indexes = practice.indexes_right;
+		shuffle_elements(indexes.begin(), indexes.end());
 		break;
 	}
 
