@@ -233,9 +233,6 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 // displays a word, wait for the user's answer,
 // if the answer is wrong, displays the right answer
 {
-	//// keeps track of the score
-	// size_t score { 0 };
-
 	Practice practice_updated = practice;
 	vector<size_t>& indexes_left = practice_updated.indexes_left;
 	vector<size_t>& indexes_right = practice_updated.indexes_right;
@@ -276,7 +273,8 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		const size_t& index = indexes[position];
 		const string& word = words_left[index];
 
-		bool must_add_newline = !(number_of_consecutive_words%minimum_number_of_words) && (number_of_consecutive_words != 0);
+		const size_t maximum_number_of_words = 2*minimum_number_of_words;
+		bool must_add_newline = !(number_of_consecutive_words%maximum_number_of_words) && (number_of_consecutive_words != 0);
 		++number_of_consecutive_words;
 
 		cout << ((must_add_newline)? "\n" : "") << word << ": ";
