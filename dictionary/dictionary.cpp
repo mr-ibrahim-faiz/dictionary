@@ -246,7 +246,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 	const vector<size_t> indexes = get_indexes(dictionary, practice, mode);
 	size_t indexes_size = indexes.size();
-	size_t number_of_consecutive_questions { 0 }; 
+	size_t number_of_consecutive_words { 0 }; 
 
 	for(size_t position = 0; position < indexes_size; ++position){
 		// calls practice mode if necessary
@@ -254,7 +254,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		case Dictionary::Mode::normal:
 			if(indexes_left.size() >= minimum_number_of_words){
 				cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
-				number_of_consecutive_questions = 0;
+				number_of_consecutive_words = 0;
 				practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_normal);
 				cout << "\n[Quiz]\n\n";
 			}
@@ -263,7 +263,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
         case Dictionary::Mode::reverse:
             if(indexes_right.size() >= minimum_number_of_words){
                 cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
-				number_of_consecutive_questions = 0;
+				number_of_consecutive_words = 0;
                 practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_reverse);
                 cout << "\n[Quiz]\n\n";
             }
@@ -276,8 +276,8 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		const size_t& index = indexes[position];
 		const string& word = words_left[index];
 
-		bool must_add_newline = !(number_of_consecutive_questions%minimum_number_of_words) && (number_of_consecutive_questions != 0);
-		++number_of_consecutive_questions;
+		bool must_add_newline = !(number_of_consecutive_words%minimum_number_of_words) && (number_of_consecutive_words != 0);
+		++number_of_consecutive_words;
 
 		cout << ((must_add_newline)? "\n" : "") << word << ": ";
 		
