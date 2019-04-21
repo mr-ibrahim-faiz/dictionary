@@ -281,12 +281,14 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		
 		// gets user's answer
 		string user_answer = get_answer();
+
+		// quits program
+		if(user_answer == exit_sequence) return practice_updated;
+
 		const string& right_answer = words_right[index];
 
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
-			//++score;
-
 			// removes the word index from the practice list if present
 			switch(mode){
 			case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:

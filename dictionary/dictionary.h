@@ -28,6 +28,7 @@ constexpr char file_delimiter { ':' };
 constexpr char exit_character { 'x' };
 constexpr char end_of_line { '$' };
 
+const string exit_sequence { ":exit" };
 const string INVALID_CHOICE = "0";
 
 // minimum number of words that triggers practice mmode
