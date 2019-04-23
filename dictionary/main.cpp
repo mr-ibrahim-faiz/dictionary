@@ -6,22 +6,22 @@ using std::runtime_error;
 int main()
 try
 {
-	// creates required files
-	create_file_if(dictionary_filename);
-	set_practice_file();
+	// sets required files
+	set_required_files();
 
 	// retrieves dictionary information from file
-	Dictionary dictionary = get_words_and_translations();
-	vector<string>& words_left =  dictionary.words_left;
-	vector<string>& words_right =  dictionary.words_right;
+	Dictionary dictionary = get_dictionary();
 
 	// retrieves practice information from file
-	Practice practice = get_practice_information();
-	vector<size_t>& indexes_left = practice.indexes_left;
-	vector<size_t>& indexes_right = practice.indexes_right;
+	Practice practice = get_practice();
+	const vector<size_t>& indexes_left = practice.indexes_left;
+	const vector<size_t>& indexes_right = practice.indexes_right;
+
+	// retrieves resume information from file
+	Resume resume = get_resume();
 
 	// displays main menu
-	display_menu(dictionary, practice);
+	display_menu(dictionary, practice, resume);
 
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
@@ -45,37 +45,35 @@ try
 				break;
 			}
 		}
+		
+		Dictionary::Mode mode = Dictionary::Mode(int(user_choice-'0')-1);
+		Dictionary::Mode mode_resume = Dictionary::Mode(int(mode)+4);
+		const vector<string>& words = get_words(dictionary, mode);
+		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
+		size_t position = get_position(resume, mode_resume);
 
 		switch (user_choice) {
-		case '1':
+		case '1': case '2':
+		{
 			cout << newline;
-			if(!words_left.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::normal);
-			else cout << "There's not a single word to display.\n";
+			if(!words.empty()){
+				if(position == INVALID_POSITION) quiz_launcher(dictionary, practice, resume, mode);
+				else quiz_launcher(dictionary, practice, resume, mode_resume);
+			}
+			else cout << "There's not a single word to display.\n";	
+		}
 			break;
 
-		case '2':
+		case '3': case '4':
+		{
             cout << newline;
-            if(!words_right.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::reverse);
-            else cout << "There's not a single word to display.\n";
-			break;
-
-        case '3':
-            cout << newline;
-			if(!indexes_left.empty()){
-				if(!words_left.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::practice_normal);
+			if(!indexes.empty()){
+				if(!words.empty()) quiz_launcher(dictionary, practice, resume, mode);
 				else cout << "There's not a single word to display.\n";
 			}
 			else cout << "Please enter a valid choice.\n";
             break;
-
-        case '4':
-            cout << newline;
-            if(!indexes_right.empty()){
-				if(!words_right.empty()) quiz_launcher(dictionary, practice, Dictionary::Mode::practice_reverse);
-				else cout << "There's not a single word to display.\n";
-            }
-			else cout << "Please enter a valid choice.\n";
-            break;
+		}
 
 		case exit_character:
 			break;
@@ -85,17 +83,19 @@ try
 			break;
 		}
 
-		if (user_choice == exit_character)
-			break;
+		if (user_choice == exit_character) break;
 		else {
 			// retrieves dictionary information from file
-			dictionary = get_words_and_translations();
+			dictionary = get_dictionary();
 
 			// retrieves practice information from file
-			practice = get_practice_information();
+			practice = get_practice();
 
-			cout << '\n';
-			display_menu(dictionary, practice);
+			// retrieves resume information from file
+			resume = get_resume();
+
+			cout << newline;
+			display_menu(dictionary, practice, resume);
 		}
 	}
 
@@ -104,10 +104,10 @@ try
 	return 0;
 }
 catch (runtime_error& e) {
-	cerr << "Error: " << e.what() << '\n';
+	cerr << "Error: " << e.what() << newline;
 	return 1;
 }
 catch (...) {
-	cerr << "Error: unknown exception caught." << '\n';
+	cerr << "Error: unknown exception caught." << newline;
 	return 2;
 }

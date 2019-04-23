@@ -4,23 +4,84 @@
 using std::ws;
 using std::streamsize;
 
-#include<limits>
-using std::numeric_limits;
-
-#include<fstream>
-using std::fstream;
-using std::ios_base;
-
 #include<stdexcept>
 using std::runtime_error;
 
-// retrieves dictionaory information from file
-Dictionary get_words_and_translations()
+// gets delimiter
+string get_delimiter_file()
+// gets practice and resume delimiter
+{
+	string delimiter;
+	delimiter.push_back(whitespace);
+	return delimiter;
+}
+
+// gets in-between period
+string get_period_file()
+// gets practice and resume in-between period
+{
+	string period = get_end_period_file();
+	period.push_back(newline);
+	return period;
+}
+
+// gets end period
+string get_end_period_file()
+// gets practice and resume end period
+{
+	string period;
+	period.push_back(whitespace);
+	period.push_back(end_of_line);
+	return period;
+}
+
+// updates position
+void Resume::update_position(const size_t& position, const Dictionary::Mode& mode){
+	switch(mode){
+	case Dictionary::Mode::normal: case Dictionary::Mode::resume_normal:
+		position_left = position;
+		break;
+
+	case Dictionary::Mode::reverse: case Dictionary::Mode::resume_reverse:
+		position_right = position;
+		break;
+
+	default:
+		break;
+	}
+}
+
+// updates indexes
+void Resume::update_indexes(const vector<size_t>& indexes, const Dictionary::Mode& mode){
+	switch(mode){
+	case Dictionary::Mode::normal:
+		indexes_left = indexes;
+		break;
+
+	case Dictionary::Mode::reverse:
+		indexes_right = indexes;
+		break;
+
+	default:
+		break;
+	}
+}
+
+// checks if valid
+bool Resume::is_valid(){
+	if((position_left != INVALID_POSITION) && position_left >= indexes_left.size()) return false;
+	if((position_right != INVALID_POSITION) && position_right >= indexes_right.size()) return false;	
+	return true;
+}
+
+// retrieves dictionary information from file
+Dictionary get_dictionary()
 // first retrieves the languages then the words and their translations
 // syntax: 
-// "language_left"delimiter "language_right"
+// "first_language"delimiter "seconde_language"
 // "words_left"delimiter "words_right
 // ex:
+// (delimiter==:)
 // english: french 
 // left: gauche
 {
@@ -33,12 +94,12 @@ Dictionary get_words_and_translations()
 	fstream file(dictionary_filename);
 	if(file.is_open()){
 		// gets languages
-		getline(file, first_language, file_delimiter);
+		getline(file, first_language, delimiter_dictionary);
 		file >> ws; // removes whitespaces
 		getline(file, second_language);
 
 		// gets words and their translations
-		for(string word; getline(file, word, file_delimiter);){
+		for(string word; getline(file, word, delimiter_dictionary);){
 			if(!word.empty()) words_left.push_back(word);
 			file >> ws;
 
@@ -55,12 +116,13 @@ Dictionary get_words_and_translations()
 }
 
 // retrieves practice information from file
-Practice get_practice_information()
+Practice get_practice()
 // retrieves the indexes of questions to retry
 // Note: first retrieves the 'left_to_right' indexes then the 'right_to_left' indexes
 // syntax:
-// idx idx idx idx delimiter
-// idx idx idx idx delimiter
+// (delimiter==$)
+// idx idx idx idx $
+// idx idx idx idx $
 {
 	Practice practice;
 	vector<size_t>& indexes_left = practice.indexes_left;
@@ -82,30 +144,106 @@ Practice get_practice_information()
 	return practice;
 }
 
-// creates file if it doesn't exit
-void create_file_if(const string& file_address)
-// create the file if it doesn't exit
+// retrieves resume information from file
+Resume get_resume()
+// retrieves positions and indexes of questions to retry
+// Note: first retrieves the positions then the indexes
+// syntax:
+// (delimiter==$)
+// position_left $
+// position_right $
+// idx idx... $
+// idx idx... $
 {
-    fstream file;
-    file.open(file_address, ios_base::in);
+	Resume resume;
+	size_t& position_left = resume.position_left;
+	size_t& position_right = resume.position_right;
+	vector<size_t>& indexes_left = resume.indexes_left;  
+	vector<size_t>& indexes_right = resume.indexes_right;  
 
-    if (file.is_open()) file.close();
-    else {
-        file.open(file_address, ios_base::out);
-        if(file.is_open()) file.close();
-    }
+	fstream file(resume_filename);
+	if(file.is_open()){
+		// retrieves current positions
+		if (file >> position_left){}
+		else position_left = INVALID_POSITION;
+
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		if (file >> position_right){}
+		else position_right = INVALID_POSITION;
+
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		// gets indexes
+		for(size_t index = 0; file >> index; indexes_left.push_back(index));
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		for(size_t index = 0; file >> index; indexes_right.push_back(index));
+		file.clear();
+        file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		file.close();
+	}
+	
+	// checks if resume is valid
+	if(!resume.is_valid()) throw runtime_error("(retrieves resume) inconsistent data.");
+
+	return resume;
+}
+
+// sets required files
+void set_required_files()
+{
+	set_dictionary_file();
+	set_practice_file();
+	set_resume_file();
+}
+
+// sets dictionary file
+void set_dictionary_file(){
+	fstream file;
+	file.open(dictionary_filename, ios_base::in);
+
+	if (file.is_open()) file.close();
+	else {
+		file.open(dictionary_filename, ios_base::out);
+		if(file.is_open()){
+			file << "English: French\n";
+			file << "worthwhile: digne d'intérêt\n";
+			file << "passing fad: mode passagère\n";
+			file << "bewildering: déconcertant\n";
+			file.close();
+		}
+	}
 }
 
 // sets practice file
 void set_practice_file(){
+	set_file(practice_filename, 2);
+}
+
+// sets resume file
+void set_resume_file(){
+	set_file(resume_filename, 4);
+}
+
+// sets file
+void set_file(const string& filename, const size_t& number_of_lines)
+// used to set practice or resume file
+// practice file contains 2 lines
+// resume file contains 4 lines
+{
     fstream file;
-    file.open(practice_filename, ios_base::in);
+    file.open(filename, ios_base::in);
 
     if (file.is_open()) file.close();
     else {
-        file.open(practice_filename, ios_base::out);
+        file.open(filename, ios_base::out);
         if(file.is_open()){
-			file << " $\n $";
+			for(size_t i = 0; i < number_of_lines; ++i) file << ((i != number_of_lines - 1)? period_file : end_period_file);
 			file.close();
 		}
     }
@@ -113,16 +251,35 @@ void set_practice_file(){
 
 // updates practice file
 void update_practice_file(const Practice& practice){
+	// gets indexes
 	const vector<size_t>& indexes_left = practice.indexes_left;
 	const vector<size_t>& indexes_right = practice.indexes_right;
 
 	// saves indexes
-	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, " ", " $\n");
-	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, " ", " $", ios_base::app);
+	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, delimiter_file, period_file);
+	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app);
+}
+
+// updates resume file
+void update_resume_file(const Resume& resume){
+	// gets positions and indexes
+	const size_t& position_left = resume.position_left;
+	const size_t& position_right = resume.position_right;
+
+	const vector<size_t>& indexes_left = resume.indexes_left;
+	const vector<size_t>& indexes_right = resume.indexes_right;
+
+	// saves positions
+	write_single_element(position_left, resume_filename, period_file);
+	write_single_element(position_right, resume_filename, period_file, ios_base::app);
+	
+	// saves indexes
+	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app);
+	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app);
 }
 
 // displays menu
-void display_menu(const Dictionary& dictionary, const Practice& practice)
+void display_menu(const Dictionary& dictionary, const Practice& practice, const Resume& resume)
 // displays main menu
 // informs the user about available choices
 {
@@ -131,13 +288,13 @@ void display_menu(const Dictionary& dictionary, const Practice& practice)
 	const size_t& number_of_questions_left = practice.indexes_left.size();
 	const size_t& number_of_questions_right = practice.indexes_right.size();
 
-	cout << "[1] " << first_language << "-" << second_language << newline;
-	cout << "[2] " << second_language << "-" << first_language << newline;
-	if(number_of_questions_left > 0) 
-		cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
-	if(number_of_questions_right > 0) 
-		cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" 
-				<< first_language << " (" << number_of_questions_right << ")" << newline;
+	const size_t& position_left = resume.position_left;
+	const size_t& position_right = resume.position_right;
+
+	cout << "[1] " << ((position_left != INVALID_POSITION)? "Resume " : "") << first_language << "-" << second_language << newline;
+	cout << "[2] " << ((position_right != INVALID_POSITION)? "Resume " : "") << second_language << "-" << first_language << newline;
+	if(number_of_questions_left > 0) cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
+	if(number_of_questions_right > 0) cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
 	cout << "[x] Exit" << newline;
 }
 
@@ -153,37 +310,28 @@ vector<size_t> get_int_distribution(const size_t& size)
 
 // gets user's answer
 string get_answer()
-// gets the user's answer
 {
 	string answer;
 	getline(cin, answer);
     return answer;
 }
 
+// gets words
+vector<string>& get_words(Dictionary& dictionary, const Dictionary::Mode& mode){
+	if(is_normal_mode(mode)) return dictionary.words_left;
+	return dictionary.words_right;
+}
+
 // gets the words to be translated
 const vector<string>& get_words_left(const Dictionary& dictionary, const Dictionary::Mode& mode){
-	switch(mode){
-	case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
-		return dictionary.words_left;
-
-	case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
-		return dictionary.words_right;
-	}
-
-	return dictionary.words_left;
+	if(is_normal_mode(mode)) return dictionary.words_left;
+	return dictionary.words_right;
 }
 
 // gets the translations
 const vector<string>& get_words_right(const Dictionary& dictionary, const Dictionary::Mode& mode){
-    switch(mode){
-	case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
-        return dictionary.words_right;
-
-	case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
-        return dictionary.words_left;
-    }
-
-	return dictionary.words_right;
+	if(is_normal_mode(mode)) return dictionary.words_right;
+	return dictionary.words_left;
 }
 
 // gets length of a word
@@ -203,15 +351,37 @@ size_t get_length(const string& str)
     return length + count/2;
 }
 
+// gets position
+size_t get_position(const Resume& resume, const Dictionary::Mode& mode)
+// gets position based on the mode
+{
+	size_t position = INITIAL_POSITION;
+	
+	switch(mode){
+	case Dictionary::Mode::resume_normal:
+		position = resume.position_left;
+		break;
+
+	case Dictionary::Mode::resume_reverse:
+		position = resume.position_right;
+		break;
+
+	default:
+		break;
+	}
+
+	return position;
+}	
+
 // gets indexes
-vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
+vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practice, const Resume& resume, const Dictionary::Mode& mode)
 // gets indexes based on the mode
-// the indexes are shuffled
+// Note: the indexes are shuffled based on the mode
 {
 	vector<size_t> indexes;
 
 	switch(mode){
-		case Dictionary::Mode::normal: case Dictionary::Mode::reverse:
+	case Dictionary::Mode::normal: case Dictionary::Mode::reverse:
 		indexes = get_int_distribution(dictionary.words_left.size());
 		break;
 
@@ -222,52 +392,120 @@ vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practic
 	case Dictionary::Mode::practice_reverse:
 		indexes = practice.indexes_right;
 		break;
+	
+	case Dictionary::Mode::resume_normal:
+		indexes = resume.indexes_left;
+		break;
+
+	case Dictionary::Mode::resume_reverse:
+		indexes = resume.indexes_right;
+		break;
 	}
 
-	shuffle_elements(indexes.begin(), indexes.end());
+	if(!is_resume_mode(mode)) shuffle_elements(indexes.begin(), indexes.end());
+	
 	return indexes;
 }
 
+// checks if it is practice mode
+bool is_practice_mode(const Dictionary::Mode& mode){
+	switch(mode){
+	case Dictionary::Mode::practice_normal: case Dictionary::Mode::practice_reverse:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+// checks if it is resume mode
+bool is_resume_mode(const Dictionary::Mode& mode){
+	switch(mode){
+	case Dictionary::Mode::resume_normal: case Dictionary::Mode::resume_reverse:
+		return true;
+
+	default:
+		return false;
+	}
+}
+
+// checks if it is normal mode
+bool is_normal_mode(const Dictionary::Mode& mode){
+	switch(mode){
+	case Dictionary::Mode::normal: case Dictionary::Mode::resume_normal: case Dictionary::Mode::practice_normal:
+		return true;
+	
+	default:
+		return false;
+	}
+}
+
+// checks if it is reverse mode
+bool is_reverse_mode(const Dictionary::Mode& mode){
+	return !is_normal_mode(mode);
+}
+
+// gets indexes size
+size_t get_indexes_size_practice(const Practice& practice, const Dictionary::Mode& mode){
+	if(is_reverse_mode(mode)) return practice.indexes_right.size();
+	return practice.indexes_left.size();
+}
+
+// gets mode practice
+Dictionary::Mode get_mode_practice(const Dictionary::Mode& mode){
+	if(is_reverse_mode(mode)) return Dictionary::Mode::practice_reverse;
+	return Dictionary::Mode::practice_normal;
+}
+
+// gets indexes practice 
+vector<size_t>& get_indexes_practice(Practice& practice, const Dictionary::Mode& mode){
+	if(is_normal_mode(mode)) return practice.indexes_left;
+	return practice.indexes_right;
+}
+
 // quiz launcher
-Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Dictionary::Mode& mode)
+Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Resume& resume, const Dictionary::Mode& mode)
 // displays a word, wait for the user's answer,
 // if the answer is wrong, displays the right answer
 {
+	// retrieves practice information
 	Practice practice_updated = practice;
-	vector<size_t>& indexes_left = practice_updated.indexes_left;
-	vector<size_t>& indexes_right = practice_updated.indexes_right;
+	vector<size_t>& indexes_practice = get_indexes_practice(practice_updated, mode);
 
-    // retrieves dictionary information from file
+    // retrieves dictionary information
     const vector<string>& words_left = get_words_left(dictionary, mode);
     const vector<string>& words_right = get_words_right(dictionary, mode);
 
-	const vector<size_t> indexes = get_indexes(dictionary, practice, mode);
+	// retrieves resume information
+	Resume resume_updated = resume;
+
+	const vector<size_t> indexes = get_indexes(dictionary, practice, resume, mode);
+
 	size_t indexes_size = indexes.size();
+	size_t position = get_position(resume, mode);
 	size_t number_of_consecutive_words { 0 }; 
 
-	for(size_t position = 0; position < indexes_size; ++position){
+	// updates resume file
+	resume_updated.update_indexes(indexes, mode);
+
+	for(; position < indexes_size; ++position){
+		// updates resume file
+		if(!is_practice_mode(mode)) {
+			resume_updated.update_position(position, mode);
+			update_resume_file(resume_updated);
+		}
+
 		// calls practice mode if necessary
-		switch(mode){
-		case Dictionary::Mode::normal:
-			if(indexes_left.size() >= minimum_number_of_words){
-				cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
+		if(!is_practice_mode(mode)){
+			size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);	
+			if(indexes_size_practice >= minimum_number_of_words){
+				cout << ((position != INITIAL_POSITION)? "\n" : "") << "[Practice]\n\n";
 				number_of_consecutive_words = 0;
-				practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_normal);
+
+				Dictionary::Mode mode_practice = get_mode_practice(mode);
+				practice_updated = quiz_launcher(dictionary, practice_updated, resume_updated, mode_practice);
 				cout << "\n[Quiz]\n\n";
 			}
-			break;
-
-        case Dictionary::Mode::reverse:
-            if(indexes_right.size() >= minimum_number_of_words){
-                cout << ((position != 0)? "\n" : "") << "[Practice]\n\n";
-				number_of_consecutive_words = 0;
-                practice_updated = quiz_launcher(dictionary, practice_updated, Dictionary::Mode::practice_reverse);
-                cout << "\n[Quiz]\n\n";
-            }
-            break;
-
-		default:
-			break;
 		}
 
 		const size_t& index = indexes[position];
@@ -290,47 +528,17 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
 			// removes the word index from the practice list if present
-			switch(mode){
-			case Dictionary::Mode::normal: case Dictionary::Mode::practice_normal:
-			{
-				vector<size_t>::iterator it = find(indexes_left.begin(), indexes_left.end(), index);
-				if (it != indexes_left.end()) indexes_left.erase(it);
-			}
-				break;
-
-			case Dictionary::Mode::reverse: case Dictionary::Mode::practice_reverse:
-			{
-				vector<size_t>::iterator it = find(indexes_right.begin(), indexes_right.end(), index);
-				if (it != indexes_right.end()) indexes_right.erase(it);
-			}
-				break;
-
-			default:
-				break;
-			}
+			vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
+			if (it != indexes_practice.end()) indexes_practice.erase(it);
 		}
 		else {
 			// updates practice indexes
-			switch(mode){
-			case Dictionary::Mode::normal:
-			{
-                vector<size_t>::iterator it = find(indexes_left.begin(), indexes_left.end(), index);
-                if (it == indexes_left.end()) indexes_left.push_back(index);
-			}
-				break;
-			
-			case Dictionary::Mode::reverse:
-			{
-                vector<size_t>::iterator it = find(indexes_right.begin(), indexes_right.end(), index);
-                if (it == indexes_right.end()) indexes_right.push_back(index);
-			}
-				break;
-
-			default:
-				break;
+			if(!is_practice_mode(mode)){
+				vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
+				if (it == indexes_practice.end()) indexes_practice.push_back(index);
 			}
 
-			// displaying right answer
+			// displays right answer
 			const size_t length = get_length(word);
 			for(size_t i = 0; i < length + 2; ++i) cout << whitespace;
 			cout << "\033[33m" << right_answer << newline << "\033[0m";
@@ -339,5 +547,12 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		// updates practice file
 		update_practice_file(practice_updated);
 	}
+
+	// updates resume file
+	if(!is_practice_mode(mode)) {
+		resume_updated.update_position(INVALID_POSITION, mode);
+		update_resume_file(resume_updated);
+	}
+
 	return practice_updated;
 }
