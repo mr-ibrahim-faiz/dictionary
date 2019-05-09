@@ -72,8 +72,8 @@ try
 				else cout << "There's not a single word to display.\n";
 			}
 			else cout << "Please enter a valid choice.\n";
-            break;
 		}
+            break;
 
 		case exit_character:
 			break;
