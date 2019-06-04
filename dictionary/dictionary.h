@@ -51,7 +51,7 @@ const string end_period_file = get_end_period_file();
 
 constexpr size_t minimum_number_of_words { 10 }; // minimum number of words that triggers practice mmode
 constexpr size_t INITIAL_POSITION = 0;
-constexpr size_t INVALID_POSITION = numeric_limits<size_t>::max();
+constexpr size_t INVALID_POSITION = numeric_limits<unsigned int>::max();
 
 // file names
 const string dictionary_filename { "dictionary.txt" };
