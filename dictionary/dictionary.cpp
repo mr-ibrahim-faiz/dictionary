@@ -2,10 +2,35 @@
 
 #include<iostream>
 using std::ws;
+using std::wcin;
 using std::streamsize;
 
 #include<stdexcept>
 using std::runtime_error;
+
+#include<codecvt>
+using std::codecvt_utf8;
+
+#include<locale>
+using std::wstring_convert;
+
+// converts a wstring to an UTF8 string
+string to_u8string(const wstring& source){
+	wstring_convert<codecvt_utf8<wchar_t>> convert;
+	return convert.to_bytes(source);
+}
+
+// converts an UTF8 string to a wstring
+wstring to_wstring(const string& source){
+	wstring_convert<codecvt_utf8<wchar_t>> convert;
+	return convert.from_bytes(source.data());
+}
+
+// converts an UTF8 string to a string
+string to_string(const string& source){
+	wstring wsource = to_wstring(source);
+	return string(wsource.begin(), wsource.end());
+}
 
 // gets delimiter
 string get_delimiter_file()
@@ -91,7 +116,7 @@ Dictionary get_dictionary()
 	vector<string>& words_left = dictionary.words_left;
 	vector<string>& words_right = dictionary.words_right;
 
-	fstream file(dictionary_filename);
+	fstream file(dictionary_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// gets languages
 		getline(file, first_language, delimiter_dictionary);
@@ -128,7 +153,7 @@ Practice get_practice()
 	vector<size_t>& indexes_left = practice.indexes_left;
 	vector<size_t>& indexes_right = practice.indexes_right;
 
-	fstream file(practice_filename);
+	fstream file(practice_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// gets indexes
 		for(size_t index = 0; file >> index; indexes_left.push_back(index));
@@ -161,7 +186,7 @@ Resume get_resume()
 	vector<size_t>& indexes_left = resume.indexes_left;  
 	vector<size_t>& indexes_right = resume.indexes_right;  
 
-	fstream file(resume_filename);
+	fstream file(resume_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// retrieves current positions
 		if (file >> position_left){}
@@ -205,11 +230,11 @@ void set_required_files()
 // sets dictionary file
 void set_dictionary_file(){
 	fstream file;
-	file.open(dictionary_filename, ios_base::in);
+	file.open(dictionary_filename, ios_base::in | ios_base::binary);
 
 	if (file.is_open()) file.close();
 	else {
-		file.open(dictionary_filename, ios_base::out);
+		file.open(dictionary_filename, ios_base::out | ios_base::binary);
 		if(file.is_open()){
 			file << "English: French\n";
 			file << "worthwhile: digne d'intérêt\n";
@@ -237,11 +262,11 @@ void set_file(const string& filename, const size_t& number_of_lines)
 // resume file contains 4 lines
 {
     fstream file;
-    file.open(filename, ios_base::in);
+    file.open(filename, ios_base::in | ios_base::binary);
 
     if (file.is_open()) file.close();
     else {
-        file.open(filename, ios_base::out);
+        file.open(filename, ios_base::out | ios_base::binary);
         if(file.is_open()){
 			for(size_t i = 0; i < number_of_lines; ++i) file << ((i != number_of_lines - 1)? period_file : end_period_file);
 			file.close();
@@ -257,7 +282,7 @@ void update_practice_file(const Practice& practice){
 
 	// saves indexes
 	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, delimiter_file, period_file);
-	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app);
+	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
 }
 
 // updates resume file
@@ -271,12 +296,53 @@ void update_resume_file(const Resume& resume){
 
 	// saves positions
 	write_single_element(position_left, resume_filename, period_file);
-	write_single_element(position_right, resume_filename, period_file, ios_base::app);
+	write_single_element(position_right, resume_filename, period_file, ios_base::app | ios_base::binary);
 	
 	// saves indexes
-	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app);
-	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app);
+	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app | ios_base::binary);
+	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
 }
+
+// writes a single element on a file
+template<typename T>
+void write_single_element(const T& t, const string& filename, const string& period, const ios_base::openmode& mode)
+// writes a single element on filename
+// the writing is ended by the period
+{
+	fstream file;
+	file.open(filename, mode);
+
+	if (file.is_open()) {
+		file << t << period;
+		file.close();
+	}
+	else
+		cerr << "Error: Unable to open file.\n";
+}
+
+// writes elements of a container on a file
+template<typename InputIterator>
+void write_elements(InputIterator first, const InputIterator last, const string& filename, const string& delimiter, const string& period, const ios_base::openmode& mode)
+// write elements of a container on file
+// elements are delimited by the delimiter
+// the writing is ended by the period
+{
+    fstream file;
+    file.open(filename, mode);
+
+    if (file.is_open()) {
+        if (first == last) file << period;
+        else {
+            for (; first != last; ++first){
+                file << *first << ((first + 1 != last) ? delimiter : period);
+            }
+        }
+        file.close();
+    }
+    else
+        cerr << "Error: Unable to open file.\n";
+}
+
 
 // displays menu
 void display_menu(const Dictionary& dictionary, const Practice& practice, const Resume& resume)
@@ -311,8 +377,9 @@ vector<size_t> get_int_distribution(const size_t& size)
 // gets user's answer
 string get_answer()
 {
-	string answer;
-	getline(cin, answer);
+	wstring wsinput;
+	getline(wcin, wsinput);
+	string answer = to_u8string(wsinput);
     return answer;
 }
 
@@ -332,23 +399,6 @@ const vector<string>& get_words_left(const Dictionary& dictionary, const Diction
 const vector<string>& get_words_right(const Dictionary& dictionary, const Dictionary::Mode& mode){
 	if(is_normal_mode(mode)) return dictionary.words_right;
 	return dictionary.words_left;
-}
-
-// gets length of a word
-size_t get_length(const string& str)
-// returns the length of a word
-// covers almost all latin-script alphabets
-{
-    if(str.empty()) return 0;
-    size_t length = 0;
-    size_t count = 0; // keeps track of the special characters
-
-    for(const char& c: str){
-        if(int(c) < 0 || int(c) > 127) ++count;
-        else ++length;
-    }
-    if(count%2) throw runtime_error("(get_length) expected a 2 bytes character.");
-    return length + count/2;
 }
 
 // gets position
@@ -515,7 +565,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		bool must_add_newline = !(number_of_consecutive_words%maximum_number_of_words) && (number_of_consecutive_words != 0);
 		++number_of_consecutive_words;
 
-		cout << ((must_add_newline)? "\n" : "") << word << ": ";
+		cout << ((must_add_newline)? "\n" : "") << to_string(word) << ": ";
 		
 		// gets user's answer
 		string user_answer = get_answer();
@@ -539,9 +589,9 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 			}
 
 			// displays right answer
-			const size_t length = get_length(word);
+			const size_t length = to_string(word).length();
 			for(size_t i = 0; i < length + 2; ++i) cout << whitespace;
-			cout << "\033[33m" << right_answer << newline << "\033[0m";
+			cout << "\033[33m" << to_string(right_answer) << newline << "\033[0m";
 		}
 
 		// updates practice file

@@ -17,6 +17,7 @@ using std::random_device;
 using std::shuffle;
 
 #include<string>
+using std::wstring;
 using std::string;
 
 #include<vector>
@@ -24,6 +25,15 @@ using std::vector;
 
 #include<limits>
 using std::numeric_limits;
+
+// converts a wstring to an UTF8 string
+string to_u8string(const wstring&);
+
+// converts an UTF8 string to a wstring
+wstring to_wstring(const string&);
+
+// converts an UTF8 string to a string
+string to_string(const string&);
 
 // gets delimiter
 string get_delimiter_file();
@@ -161,43 +171,11 @@ void update_resume_file(const Resume&);
 
 // writes a single element on a file
 template<typename T>
-void write_single_element(const T& t, const string& filename, const string& period, ios_base::openmode mode = ios_base::out)
-// writes a single element on filename
-// the writing is ended by the period
-{
-	fstream file;
-	file.open(filename, mode);
-
-	if (file.is_open()) {
-		file << t << period;
-		file.close();
-	}
-	else
-		cerr << "Error: Unable to open file.\n";
-}
+void write_single_element(const T&, const string&, const string& period, const ios_base::openmode& = ios_base::out | ios_base::binary);
 
 // writes elements of a container on a file
 template<typename InputIterator>
-void write_elements(InputIterator first, InputIterator last, const string& filename, const string& delimiter, const string& period, ios_base::openmode mode = ios_base::out)
-// write elements of a container on file
-// elements are delimited by the delimiter
-// the writing is ended by the period
-{
-    fstream file;
-    file.open(filename, mode);
-
-    if (file.is_open()) { 
-        if (first == last) file << period;
-        else {
-            for (; first != last; ++first){ 
-                file << *first << ((first + 1 != last) ? delimiter : period);
-            }   
-        }   
-        file.close();
-    }
-    else
-        cerr << "Error: Unable to open file.\n";
-}
+void write_elements(InputIterator, const InputIterator, const string&, const string&, const string&, const ios_base::openmode& = ios_base::out | ios_base::binary);
 
 // displays menu
 void display_menu(const Dictionary&, const Practice&, const Resume&);
@@ -216,9 +194,6 @@ const vector<string>& get_words_left(const Dictionary&, const Dictionary::Mode&)
 
 // gets the translations
 const vector<string>& get_words_right(const Dictionary&, const Dictionary::Mode&);
-
-// gets length of a word
-size_t get_length(const string&);
 
 // gets position
 size_t get_position(const Resume&, const Dictionary::Mode&);
