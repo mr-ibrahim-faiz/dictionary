@@ -3,3 +3,9 @@ dictionary/dictionary.txt
 dictionary/practice.txt
 dictionary/resume.txt
 dictionary/*.exe
+/dictionary/x64/Release
+/dictionary/.vs/dictionary/v15
+/dictionary/dictionary.sln
+/dictionary/dictionary.vcxproj.user
+/dictionary/dictionary.vcxproj.filters
+/dictionary/dictionary.vcxproj

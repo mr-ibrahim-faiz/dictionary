@@ -1,3 +1,5 @@
+#pragma warning(disable: 4996)
+
 #include "dictionary.h"
 
 #include<iostream>
