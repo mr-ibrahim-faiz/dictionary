@@ -91,7 +91,7 @@ Dictionary get_dictionary()
 	vector<string>& words_left = dictionary.words_left;
 	vector<string>& words_right = dictionary.words_right;
 
-	fstream file(dictionary_filename);
+	fstream file(dictionary_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// gets languages
 		getline(file, first_language, delimiter_dictionary);
@@ -128,7 +128,7 @@ Practice get_practice()
 	vector<size_t>& indexes_left = practice.indexes_left;
 	vector<size_t>& indexes_right = practice.indexes_right;
 
-	fstream file(practice_filename);
+	fstream file(practice_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// gets indexes
 		for(size_t index = 0; file >> index; indexes_left.push_back(index));
@@ -161,7 +161,7 @@ Resume get_resume()
 	vector<size_t>& indexes_left = resume.indexes_left;  
 	vector<size_t>& indexes_right = resume.indexes_right;  
 
-	fstream file(resume_filename);
+	fstream file(resume_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
 		// retrieves current positions
 		if (file >> position_left){}
@@ -205,11 +205,11 @@ void set_required_files()
 // sets dictionary file
 void set_dictionary_file(){
 	fstream file;
-	file.open(dictionary_filename, ios_base::in);
+	file.open(dictionary_filename, ios_base::in | ios_base::binary);
 
 	if (file.is_open()) file.close();
 	else {
-		file.open(dictionary_filename, ios_base::out);
+		file.open(dictionary_filename, ios_base::out | ios_base::binary);
 		if(file.is_open()){
 			file << "English: French\n";
 			file << "worthwhile: digne d'intérêt\n";
@@ -237,11 +237,11 @@ void set_file(const string& filename, const size_t& number_of_lines)
 // resume file contains 4 lines
 {
     fstream file;
-    file.open(filename, ios_base::in);
+    file.open(filename, ios_base::in | ios_base::binary);
 
     if (file.is_open()) file.close();
     else {
-        file.open(filename, ios_base::out);
+        file.open(filename, ios_base::out | ios_base::binary);
         if(file.is_open()){
 			for(size_t i = 0; i < number_of_lines; ++i) file << ((i != number_of_lines - 1)? period_file : end_period_file);
 			file.close();
@@ -257,7 +257,7 @@ void update_practice_file(const Practice& practice){
 
 	// saves indexes
 	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, delimiter_file, period_file);
-	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app);
+	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
 }
 
 // updates resume file
@@ -271,12 +271,53 @@ void update_resume_file(const Resume& resume){
 
 	// saves positions
 	write_single_element(position_left, resume_filename, period_file);
-	write_single_element(position_right, resume_filename, period_file, ios_base::app);
+	write_single_element(position_right, resume_filename, period_file, ios_base::app | ios_base::binary);
 	
 	// saves indexes
-	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app);
-	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app);
+	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app | ios_base::binary);
+	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
 }
+
+// writes a single element on a file
+template<typename T>
+void write_single_element(const T& t, const string& filename, const string& period, const ios_base::openmode& mode)
+// writes a single element on filename
+// the writing is ended by the period
+{
+	fstream file;
+	file.open(filename, mode);
+
+	if (file.is_open()) {
+		file << t << period;
+		file.close();
+	}
+	else
+		cerr << "Error: Unable to open file.\n";
+}
+
+// writes elements of a container on a file
+template<typename InputIterator>
+void write_elements(InputIterator first, const InputIterator last, const string& filename, const string& delimiter, const string& period, const ios_base::openmode& mode)
+// write elements of a container on file
+// elements are delimited by the delimiter
+// the writing is ended by the period
+{
+    fstream file;
+    file.open(filename, mode);
+
+    if (file.is_open()) {
+        if (first == last) file << period;
+        else {
+            for (; first != last; ++first){
+                file << *first << ((first + 1 != last) ? delimiter : period);
+            }
+        }
+        file.close();
+    }
+    else
+        cerr << "Error: Unable to open file.\n";
+}
+
 
 // displays menu
 void display_menu(const Dictionary& dictionary, const Practice& practice, const Resume& resume)
