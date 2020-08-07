@@ -276,6 +276,72 @@ void set_file(const string& filename, const size_t& number_of_lines)
     }
 }
 
+// updates the practice data
+Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary) {
+	Practice updated_practice;
+
+	vector<size_t> indexes_left = practice.indexes_left;
+	vector<size_t> indexes_right = practice.indexes_right;
+
+	// adds newly added words
+	const size_t dictionary_size = dictionary.words_left.size();
+	const size_t indexes_left_size = resume.indexes_left.size();
+	const size_t indexes_right_size = resume.indexes_right.size();
+
+	if (!resume.indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+		const size_t new_words = dictionary_size - indexes_left_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_left.push_back(indexes_left_size + i);
+		}
+	}
+
+	if (!resume.indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+		const size_t new_words = dictionary_size - indexes_right_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_right.push_back(indexes_right_size + i);
+		}
+	}
+
+	updated_practice.indexes_left = indexes_left;
+	updated_practice.indexes_right = indexes_right;
+
+	return updated_practice;
+}
+
+// updates the resume data
+Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
+	Resume updated_resume;
+	updated_resume.position_left = resume.position_left;
+	updated_resume.position_right = resume.position_right;
+
+	vector<size_t> indexes_left = resume.indexes_left;
+	vector<size_t> indexes_right = resume.indexes_right;
+
+	// adds newly added words
+	const size_t dictionary_size = dictionary.words_left.size();
+	const size_t indexes_left_size = indexes_left.size();
+	const size_t indexes_right_size = indexes_right.size();
+
+	if (!indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+		const size_t new_words = dictionary_size - indexes_left_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_left.push_back(indexes_left_size + i);
+		}
+	}
+
+	if (!indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+		const size_t new_words = dictionary_size - indexes_right_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_right.push_back(indexes_right_size + i);
+		}
+	}
+
+	updated_resume.indexes_left = indexes_left;
+	updated_resume.indexes_right = indexes_right;
+
+	return updated_resume;
+}
+
 // updates practice file
 void update_practice_file(const Practice& practice){
 	// gets indexes

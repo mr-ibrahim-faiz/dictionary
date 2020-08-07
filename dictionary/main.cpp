@@ -12,13 +12,22 @@ try
 	// retrieves dictionary information from file
 	Dictionary dictionary = get_dictionary();
 
-	// retrieves practice information from file
-	Practice practice = get_practice();
-	const vector<size_t>& indexes_left = practice.indexes_left;
-	const vector<size_t>& indexes_right = practice.indexes_right;
-
 	// retrieves resume information from file
 	Resume resume = get_resume();
+
+	// retrieves practice information from file
+	Practice practice = get_practice();
+
+	// updates practice file
+	practice = update_practice(practice, resume, dictionary);
+	update_practice_file(practice);
+
+	// updates resume file
+	resume = update_resume(resume, dictionary);
+	update_resume_file(resume);
+
+	const vector<size_t>& indexes_left = practice.indexes_left;
+	const vector<size_t>& indexes_right = practice.indexes_right;
 
 	// displays main menu
 	display_menu(dictionary, practice, resume);
@@ -88,11 +97,19 @@ try
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
 
+			// retrieves resume information from file
+			resume = get_resume();
+
 			// retrieves practice information from file
 			practice = get_practice();
 
-			// retrieves resume information from file
-			resume = get_resume();
+			// updates practice file
+			practice = update_practice(practice, resume, dictionary);
+			update_practice_file(practice);
+
+			// updates resume file
+			resume = update_resume(resume, dictionary);
+			update_resume_file(resume);
 
 			cout << newline;
 			display_menu(dictionary, practice, resume);
