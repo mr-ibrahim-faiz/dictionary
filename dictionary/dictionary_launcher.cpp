@@ -1,6 +1,6 @@
 #pragma warning(disable: 4996)
 
-#include "dictionary.h"
+#include "dictionary_launcher.h"
 
 #include<iostream>
 using std::ws;
@@ -15,6 +15,24 @@ using std::codecvt_utf8;
 
 #include<locale>
 using std::wstring_convert;
+
+#include<fstream>
+using std::fstream;
+
+// symbolic names
+constexpr char whitespace { ' ' };
+constexpr char delimiter_dictionary { ':' };
+constexpr char end_of_line { '$' };
+
+constexpr size_t minimum_number_of_words { 10 }; // minimum number of words that triggers practice mmode
+constexpr size_t initial_position { 0 };
+
+const string exit_sequence { ":exit" };
+
+// file names
+const string dictionary_filename { "dictionary.txt" };
+const string practice_filename { "practice.txt" };
+const string resume_filename { "resume.txt" };
 
 // converts a wstring to an UTF8 string
 string to_u8string(const wstring& source){
@@ -96,8 +114,8 @@ void Resume::update_indexes(const vector<size_t>& indexes, const Dictionary::Mod
 
 // checks if valid
 bool Resume::is_valid(){
-	if((position_left != INVALID_POSITION) && position_left >= indexes_left.size()) return false;
-	if((position_right != INVALID_POSITION) && position_right >= indexes_right.size()) return false;	
+	if((position_left != invalid_position) && position_left >= indexes_left.size()) return false;
+	if((position_right != invalid_position) && position_right >= indexes_right.size()) return false;	
 	return true;
 }
 
@@ -192,13 +210,13 @@ Resume get_resume()
 	if(file.is_open()){
 		// retrieves current positions
 		if (file >> position_left){}
-		else position_left = INVALID_POSITION;
+		else position_left = invalid_position;
 
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
 		if (file >> position_right){}
-		else position_right = INVALID_POSITION;
+		else position_right = invalid_position;
 
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
@@ -425,8 +443,8 @@ void display_menu(const Dictionary& dictionary, const Practice& practice, const 
 	const size_t& position_left = resume.position_left;
 	const size_t& position_right = resume.position_right;
 
-	cout << "[1] " << ((position_left != INVALID_POSITION)? "Resume " : "") << first_language << "-" << second_language << newline;
-	cout << "[2] " << ((position_right != INVALID_POSITION)? "Resume " : "") << second_language << "-" << first_language << newline;
+	cout << "[1] " << ((position_left != invalid_position)? "Resume " : "") << first_language << "-" << second_language << newline;
+	cout << "[2] " << ((position_right != invalid_position)? "Resume " : "") << second_language << "-" << first_language << newline;
 	if(number_of_questions_left > 0) cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
 	if(number_of_questions_right > 0) cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
 	cout << "[x] Exit" << newline;
@@ -473,7 +491,7 @@ const vector<string>& get_words_right(const Dictionary& dictionary, const Dictio
 size_t get_position(const Resume& resume, const Dictionary::Mode& mode)
 // gets position based on the mode
 {
-	size_t position = INITIAL_POSITION;
+	size_t position = initial_position;
 	
 	switch(mode){
 	case Dictionary::Mode::resume_normal:
@@ -617,7 +635,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		if(!is_practice_mode(mode)){
 			size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);	
 			if(indexes_size_practice >= minimum_number_of_words){
-				cout << ((position != INITIAL_POSITION)? "\n" : "") << "[Practice]\n\n";
+				cout << ((position != initial_position)? "\n" : "") << "[Practice]\n\n";
 				number_of_consecutive_words = 0;
 
 				Dictionary::Mode mode_practice = get_mode_practice(mode);
@@ -668,7 +686,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 	// updates resume file
 	if(!is_practice_mode(mode)) {
-		resume_updated.update_position(INVALID_POSITION, mode);
+		resume_updated.update_position(invalid_position, mode);
 		update_resume_file(resume_updated);
 	}
 

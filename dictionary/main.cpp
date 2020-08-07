@@ -1,7 +1,11 @@
-#include "dictionary.h"
+#include "dictionary_launcher.h"
 
 #include<stdexcept>
 using std::runtime_error;
+
+// symbolic names
+constexpr char exit_character { 'x' };
+const string INVALID_CHOICE { "0" };
 
 int main()
 try
@@ -66,7 +70,7 @@ try
 		{
 			cout << newline;
 			if(!words.empty()){
-				if(position == INVALID_POSITION) quiz_launcher(dictionary, practice, resume, mode);
+				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
 			else cout << "There's not a single word to display.\n";	
