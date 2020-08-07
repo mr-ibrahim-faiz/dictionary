@@ -2,3 +2,9 @@ dictionary/dictionary
 dictionary/dictionary.txt
 dictionary/practice.txt
 dictionary/resume.txt
+dictionary/.vs/
+dictionary/dictionary.sln
+dictionary/dictionary.vcxproj
+dictionary/dictionary.vcxproj.filters
+dictionary/dictionary.vcxproj.user
+dictionary/x64/

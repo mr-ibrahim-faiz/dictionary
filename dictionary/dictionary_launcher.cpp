@@ -1,4 +1,4 @@
-#include "dictionary.h"
+#include "dictionary_launcher.h"
 
 #include<iostream>
 using std::ws;
@@ -6,6 +6,24 @@ using std::streamsize;
 
 #include<stdexcept>
 using std::runtime_error;
+
+#include<fstream>
+using std::fstream;
+
+// symbolic names
+constexpr char whitespace { ' ' };
+constexpr char delimiter_dictionary { ':' };
+constexpr char end_of_line { '$' };
+
+constexpr size_t minimum_number_of_words { 10 }; // minimum number of words that triggers practice mmode
+constexpr size_t initial_position { 0 };
+
+const string exit_sequence { ":exit" };
+
+// file names
+const string dictionary_filename { "dictionary.txt" };
+const string practice_filename { "practice.txt" };
+const string resume_filename { "resume.txt" };
 
 // gets delimiter
 string get_delimiter_file()
@@ -69,8 +87,8 @@ void Resume::update_indexes(const vector<size_t>& indexes, const Dictionary::Mod
 
 // checks if valid
 bool Resume::is_valid(){
-	if((position_left != INVALID_POSITION) && position_left >= indexes_left.size()) return false;
-	if((position_right != INVALID_POSITION) && position_right >= indexes_right.size()) return false;	
+	if((position_left != invalid_position) && position_left >= indexes_left.size()) return false;
+	if((position_right != invalid_position) && position_right >= indexes_right.size()) return false;	
 	return true;
 }
 
@@ -165,13 +183,13 @@ Resume get_resume()
 	if(file.is_open()){
 		// retrieves current positions
 		if (file >> position_left){}
-		else position_left = INVALID_POSITION;
+		else position_left = invalid_position;
 
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
 		if (file >> position_right){}
-		else position_right = INVALID_POSITION;
+		else position_right = invalid_position;
 
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
@@ -247,6 +265,72 @@ void set_file(const string& filename, const size_t& number_of_lines)
 			file.close();
 		}
     }
+}
+
+// updates the practice data
+Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary) {
+	Practice updated_practice;
+
+	vector<size_t> indexes_left = practice.indexes_left;
+	vector<size_t> indexes_right = practice.indexes_right;
+
+	// adds newly added words
+	const size_t dictionary_size = dictionary.words_left.size();
+	const size_t indexes_left_size = resume.indexes_left.size();
+	const size_t indexes_right_size = resume.indexes_right.size();
+
+	if (!resume.indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+		const size_t new_words = dictionary_size - indexes_left_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_left.push_back(indexes_left_size + i);
+		}
+	}
+
+	if (!resume.indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+		const size_t new_words = dictionary_size - indexes_right_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_right.push_back(indexes_right_size + i);
+		}
+	}
+
+	updated_practice.indexes_left = indexes_left;
+	updated_practice.indexes_right = indexes_right;
+
+	return updated_practice;
+}
+
+// updates the resume data
+Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
+	Resume updated_resume;
+	updated_resume.position_left = resume.position_left;
+	updated_resume.position_right = resume.position_right;
+
+	vector<size_t> indexes_left = resume.indexes_left;
+	vector<size_t> indexes_right = resume.indexes_right;
+
+	// adds newly added words
+	const size_t dictionary_size = dictionary.words_left.size();
+	const size_t indexes_left_size = indexes_left.size();
+	const size_t indexes_right_size = indexes_right.size();
+
+	if (!indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+		const size_t new_words = dictionary_size - indexes_left_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_left.push_back(indexes_left_size + i);
+		}
+	}
+
+	if (!indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+		const size_t new_words = dictionary_size - indexes_right_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			indexes_right.push_back(indexes_right_size + i);
+		}
+	}
+
+	updated_resume.indexes_left = indexes_left;
+	updated_resume.indexes_right = indexes_right;
+
+	return updated_resume;
 }
 
 // updates practice file
@@ -332,8 +416,8 @@ void display_menu(const Dictionary& dictionary, const Practice& practice, const 
 	const size_t& position_left = resume.position_left;
 	const size_t& position_right = resume.position_right;
 
-	cout << "[1] " << ((position_left != INVALID_POSITION)? "Resume " : "") << first_language << "-" << second_language << newline;
-	cout << "[2] " << ((position_right != INVALID_POSITION)? "Resume " : "") << second_language << "-" << first_language << newline;
+	cout << "[1] " << ((position_left != invalid_position)? "Resume " : "") << first_language << "-" << second_language << newline;
+	cout << "[2] " << ((position_right != invalid_position)? "Resume " : "") << second_language << "-" << first_language << newline;
 	if(number_of_questions_left > 0) cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
 	if(number_of_questions_right > 0) cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
 	cout << "[x] Exit" << newline;
@@ -396,7 +480,7 @@ size_t get_length(const string& str)
 size_t get_position(const Resume& resume, const Dictionary::Mode& mode)
 // gets position based on the mode
 {
-	size_t position = INITIAL_POSITION;
+	size_t position = initial_position;
 	
 	switch(mode){
 	case Dictionary::Mode::resume_normal:
@@ -540,7 +624,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		if(!is_practice_mode(mode)){
 			size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);	
 			if(indexes_size_practice >= minimum_number_of_words){
-				cout << ((position != INITIAL_POSITION)? "\n" : "") << "[Practice]\n\n";
+				cout << ((position != initial_position)? "\n" : "") << "[Practice]\n\n";
 				number_of_consecutive_words = 0;
 
 				Dictionary::Mode mode_practice = get_mode_practice(mode);
@@ -591,7 +675,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 	// updates resume file
 	if(!is_practice_mode(mode)) {
-		resume_updated.update_position(INVALID_POSITION, mode);
+		resume_updated.update_position(invalid_position, mode);
 		update_resume_file(resume_updated);
 	}
 
