@@ -267,7 +267,7 @@ void set_dictionary_file(){
 
 // sets practice file
 void set_practice_file(){
-	set_file(practice_filename, 2);
+	set_file(practice_filename, 4);
 }
 
 // sets resume file
