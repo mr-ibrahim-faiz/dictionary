@@ -384,13 +384,19 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
 }
 
 // updates practice file
-void update_practice_file(const Practice& practice){
-	// gets indexes
+void update_practice_file(const Practice& practice) {
+	// gets positions and indexes
+	const size_t& position_left = practice.position_left;
+	const size_t& position_right = practice.position_right;
 	const vector<size_t>& indexes_left = practice.indexes_left;
 	const vector<size_t>& indexes_right = practice.indexes_right;
 
+	// saves positions
+	write_single_element(position_left, practice_filename, period_file);
+	write_single_element(position_right, practice_filename, period_file, ios_base::app | ios_base::binary);
+
 	// saves indexes
-	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, delimiter_file, period_file);
+	write_elements(indexes_left.begin(), indexes_left.end(), practice_filename, delimiter_file, period_file, ios_base::app | ios_base::binary);
 	write_elements(indexes_right.begin(), indexes_right.end(), practice_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
 }
 
