@@ -26,7 +26,7 @@ struct Dictionary {
 
 	// modes
 	enum class Mode {
-		normal, reverse, practice_normal, practice_reverse, normal_resume, reverse_resume
+		normal, reverse, practice_normal, practice_reverse, normal_resume, reverse_resume, practice_normal_resume, practice_reverse_resume
 	};
 };
 
