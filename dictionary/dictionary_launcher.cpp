@@ -83,11 +83,11 @@ string get_end_period_file()
 // updates position
 void Resume::update_position(const size_t& position, const Dictionary::Mode& mode){
 	switch(mode){
-	case Dictionary::Mode::normal: case Dictionary::Mode::resume_normal:
+	case Dictionary::Mode::normal: case Dictionary::Mode::normal_resume:
 		position_left = position;
 		break;
 
-	case Dictionary::Mode::reverse: case Dictionary::Mode::resume_reverse:
+	case Dictionary::Mode::reverse: case Dictionary::Mode::reverse_resume:
 		position_right = position;
 		break;
 
@@ -494,11 +494,11 @@ size_t get_position(const Resume& resume, const Dictionary::Mode& mode)
 	size_t position = initial_position;
 	
 	switch(mode){
-	case Dictionary::Mode::resume_normal:
+	case Dictionary::Mode::normal_resume:
 		position = resume.position_left;
 		break;
 
-	case Dictionary::Mode::resume_reverse:
+	case Dictionary::Mode::reverse_resume:
 		position = resume.position_right;
 		break;
 
@@ -529,11 +529,11 @@ vector<size_t> get_indexes(const Dictionary& dictionary, const Practice& practic
 		indexes = practice.indexes_right;
 		break;
 	
-	case Dictionary::Mode::resume_normal:
+	case Dictionary::Mode::normal_resume:
 		indexes = resume.indexes_left;
 		break;
 
-	case Dictionary::Mode::resume_reverse:
+	case Dictionary::Mode::reverse_resume:
 		indexes = resume.indexes_right;
 		break;
 	}
@@ -557,7 +557,7 @@ bool is_practice_mode(const Dictionary::Mode& mode){
 // checks if it is resume mode
 bool is_resume_mode(const Dictionary::Mode& mode){
 	switch(mode){
-	case Dictionary::Mode::resume_normal: case Dictionary::Mode::resume_reverse:
+	case Dictionary::Mode::normal_resume: case Dictionary::Mode::reverse_resume:
 		return true;
 
 	default:
@@ -568,7 +568,7 @@ bool is_resume_mode(const Dictionary::Mode& mode){
 // checks if it is normal mode
 bool is_normal_mode(const Dictionary::Mode& mode){
 	switch(mode){
-	case Dictionary::Mode::normal: case Dictionary::Mode::resume_normal: case Dictionary::Mode::practice_normal:
+	case Dictionary::Mode::normal: case Dictionary::Mode::normal_resume: case Dictionary::Mode::practice_normal:
 		return true;
 	
 	default:
@@ -624,6 +624,9 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	// updates resume file
 	resume_updated.update_indexes(indexes, mode);
 
+	size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);
+	size_t factor = indexes_size_practice / minimum_number_of_words + 1;
+
 	for(; position < indexes_size; ++position){
 		// updates resume file
 		if(!is_practice_mode(mode)) {
@@ -633,8 +636,9 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 		// calls practice mode if necessary
 		if(!is_practice_mode(mode)){
-			size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);	
-			if(indexes_size_practice >= minimum_number_of_words){
+			indexes_size_practice = get_indexes_size_practice(practice_updated, mode); // updates practice indexes size
+
+			if(indexes_size_practice >= (minimum_number_of_words*factor)){
 				cout << ((position != initial_position)? "\n" : "") << "[Practice]\n\n";
 				number_of_consecutive_words = 0;
 
@@ -642,6 +646,8 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 				practice_updated = quiz_launcher(dictionary, practice_updated, resume_updated, mode_practice);
 				cout << "\n[Quiz]\n\n";
 			}
+
+			factor = indexes_size_practice / minimum_number_of_words + 1; // updates factor
 		}
 
 		const size_t& index = indexes[position];
