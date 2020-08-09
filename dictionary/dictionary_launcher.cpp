@@ -318,6 +318,8 @@ void set_file(const string& filename, const size_t& number_of_lines)
 // updates the practice data
 Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary) {
 	Practice updated_practice;
+	updated_practice.position_left = practice.position_left;
+	updated_practice.position_right = practice.position_right;
 
 	vector<size_t> indexes_left = practice.indexes_left;
 	vector<size_t> indexes_right = practice.indexes_right;
