@@ -63,7 +63,7 @@ try
 		Dictionary::Mode mode_resume = Dictionary::Mode(int(mode)+4);
 		const vector<string>& words = get_words(dictionary, mode);
 		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
-		size_t position = get_position(resume, mode_resume);
+		size_t position = get_position(resume, practice, mode_resume);
 
 		switch (user_choice) {
 		case '1': case '2':
@@ -81,7 +81,10 @@ try
 		{
             cout << newline;
 			if(!indexes.empty()){
-				if(!words.empty()) quiz_launcher(dictionary, practice, resume, mode);
+				if (!words.empty()) {
+					if (position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
+					else quiz_launcher(dictionary, practice, resume, mode_resume);
+				}
 				else cout << "There's not a single word to display.\n";
 			}
 			else cout << "Please enter a valid choice.\n";

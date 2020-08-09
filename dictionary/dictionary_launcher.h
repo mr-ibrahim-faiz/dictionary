@@ -124,7 +124,7 @@ const vector<string>& get_words_left(const Dictionary&, const Dictionary::Mode&)
 const vector<string>& get_words_right(const Dictionary&, const Dictionary::Mode&);
 
 // gets position
-size_t get_position(const Resume&, const Dictionary::Mode&);
+size_t get_position(const Resume&, const Practice&, const Dictionary::Mode&);
 
 // gets indexes
 vector<size_t> get_indexes(const Dictionary&, const Practice&, const Resume&, const Dictionary::Mode&);
