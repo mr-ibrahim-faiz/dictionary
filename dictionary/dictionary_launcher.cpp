@@ -469,13 +469,22 @@ void display_menu(const Dictionary& dictionary, const Practice& practice, const 
 	const size_t& number_of_questions_left = practice.indexes_left.size();
 	const size_t& number_of_questions_right = practice.indexes_right.size();
 
-	const size_t& position_left = resume.position_left;
-	const size_t& position_right = resume.position_right;
+	const size_t& position_left_resume = resume.position_left;
+	const size_t& position_right_resume = resume.position_right;
 
-	cout << "[1] " << ((position_left != invalid_position)? "Resume " : "") << first_language << "-" << second_language << newline;
-	cout << "[2] " << ((position_right != invalid_position)? "Resume " : "") << second_language << "-" << first_language << newline;
-	if(number_of_questions_left > 0) cout << "[3] Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
-	if(number_of_questions_right > 0) cout << ((number_of_questions_left == 0)? "[3]":"[4]") << " Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
+	const size_t& position_left_practice = practice.position_left;
+	const size_t& position_right_practice = practice.position_right;
+
+	cout << "[1] " << ((position_left_resume != invalid_position)? "Resume " : "") << first_language << "-" << second_language << newline;
+	cout << "[2] " << ((position_right_resume != invalid_position)? "Resume " : "") << second_language << "-" << first_language << newline;
+	if (number_of_questions_left > 0) {
+		cout << "[3] " << ((position_left_practice != invalid_position) ? "Resume " : "");
+		cout << "Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
+	}
+	if (number_of_questions_right > 0) {
+		cout << ((number_of_questions_left == 0) ? "[3] " : "[4] ") << ((position_right_practice != invalid_position) ? "Resume " : "");
+		cout << "Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
+	}
 	cout << "[x] Exit" << newline;
 }
 
