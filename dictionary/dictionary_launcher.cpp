@@ -162,36 +162,57 @@ Dictionary get_dictionary()
 
 // retrieves practice information from file
 Practice get_practice()
-// retrieves the indexes of questions to retry
+// retrieves the indexes of questions to practice
 // Note: first retrieves the 'left_to_right' indexes then the 'right_to_left' indexes
 // syntax:
 // (delimiter==$)
-// idx idx idx idx $
-// idx idx idx idx $
+// position_left $
+// position_right $
+// idx idx... $
+// idx idx... $
 {
 	Practice practice;
+	size_t& position_left = practice.position_left;
+	size_t& position_right = practice.position_right;
 	vector<size_t>& indexes_left = practice.indexes_left;
 	vector<size_t>& indexes_right = practice.indexes_right;
 
 	fstream file(practice_filename, ios_base::in | ios_base::binary);
-	if(file.is_open()){
-		// gets indexes
-		for(size_t index = 0; file >> index; indexes_left.push_back(index));
+	if (file.is_open()) {
+		// retrieves current positions
+		if (file >> position_left) {}
+		else position_left = invalid_position;
+
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
-		for(size_t index = 0; file >> index; indexes_right.push_back(index));
+		if (file >> position_right) {}
+		else position_right = invalid_position;
+
 		file.clear();
-        file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		// gets indexes
+		for (size_t index = 0; file >> index; indexes_left.push_back(index));
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
+
+		for (size_t index = 0; file >> index; indexes_right.push_back(index));
+		file.clear();
+		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
 		file.close();
 	}
+
+	// checks if practice is valid
+	if (!practice.is_valid()) throw runtime_error("(retrieves practice) inconsistent data.");
+
 	return practice;
 }
 
 // retrieves resume information from file
 Resume get_resume()
-// retrieves positions and indexes of questions to retry
+// retrieves positions and indexes of questions to resume
 // Note: first retrieves the positions then the indexes
 // syntax:
 // (delimiter==$)
