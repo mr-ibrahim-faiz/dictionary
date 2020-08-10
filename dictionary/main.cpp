@@ -6,6 +6,9 @@ using std::runtime_error;
 // symbolic names
 constexpr char exit_character { 'x' };
 const string invalid_choice { "0" };
+const string message_empty_list { "There's not a single word to display." };
+const string message_invalid_choice { "Please enter a valid choice." };
+const string message_exit { "Goodbye !" };
 
 int main()
 try
@@ -73,7 +76,7 @@ try
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
-			else cout << "There's not a single word to display.\n";	
+			else cout << message_empty_list << newline;
 		}
 			break;
 
@@ -85,9 +88,9 @@ try
 					if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 					else quiz_launcher(dictionary, practice, resume, mode_resume);
 				}
-				else cout << "There's not a single word to display.\n";
+				else cout << message_empty_list << newline;
 			}
-			else cout << "Please enter a valid choice.\n";
+			else cout << message_invalid_choice << newline;
 		}
             break;
 
@@ -95,7 +98,8 @@ try
 			break;
 
 		default:
-			cout << "\nPlease enter a valid choice.\n";
+			cout << newline;
+			cout << message_invalid_choice << newline;
 			break;
 		}
 
@@ -123,7 +127,8 @@ try
 		}
 	}
 
-	cout << "\nGoodbye !\n";
+	cout << newline;
+	cout << message_exit << newline;
 
 	return 0;
 }
