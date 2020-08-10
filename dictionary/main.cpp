@@ -6,6 +6,8 @@ using std::runtime_error;
 // symbolic names
 constexpr char exit_character { 'x' };
 const string invalid_choice { "0" };
+
+// messages
 const string message_empty_list { "There's not a single word to display." };
 const string message_invalid_choice { "Please enter a valid choice." };
 const string message_exit { "Goodbye !" };

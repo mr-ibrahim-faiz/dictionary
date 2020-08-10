@@ -186,15 +186,15 @@ Practice get_practice()
 	vector<size_t>& indexes_right = practice.indexes_right;
 
 	fstream file(practice_filename, ios_base::in | ios_base::binary);
-	if(file.is_open()) {
+	if(file.is_open()){
 		// retrieves current positions
-		if(file >> position_left) {}
+		if(file >> position_left){}
 		else position_left = invalid_position;
 
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
-		if(file >> position_right) {}
+		if(file >> position_right){}
 		else position_right = invalid_position;
 
 		file.clear();
@@ -282,7 +282,7 @@ void set_dictionary_file(){
 	file.open(dictionary_filename, ios_base::in | ios_base::binary);
 
 	if(file.is_open()) file.close();
-	else {
+	else{
 		file.open(dictionary_filename, ios_base::out | ios_base::binary);
 		if(file.is_open()){
 			file << "English: French\n";
@@ -314,7 +314,7 @@ void set_file(const string& filename, const size_t& number_of_lines)
     file.open(filename, ios_base::in | ios_base::binary);
 
     if(file.is_open()) file.close();
-    else {
+    else{
         file.open(filename, ios_base::out | ios_base::binary);
         if(file.is_open()){
 			for(size_t i = 0; i < number_of_lines; ++i) file << ((i != number_of_lines - 1)? period_file : end_period_file);
@@ -324,7 +324,7 @@ void set_file(const string& filename, const size_t& number_of_lines)
 }
 
 // updates the practice data
-Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary) {
+Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary){
 	Practice updated_practice;
 	updated_practice.position_left = practice.position_left;
 	updated_practice.position_right = practice.position_right;
@@ -337,16 +337,16 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 	const size_t indexes_left_size = resume.indexes_left.size();
 	const size_t indexes_right_size = resume.indexes_right.size();
 
-	if(!resume.indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+	if(!resume.indexes_left.empty() && (dictionary_size > indexes_left_size)){
 		const size_t new_words = dictionary_size - indexes_left_size;
-		for (size_t i { 0 }; i < new_words; ++i) {
+		for (size_t i { 0 }; i < new_words; ++i){
 			indexes_left.push_back(indexes_left_size + i);
 		}
 	}
 
-	if(!resume.indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+	if(!resume.indexes_right.empty() && (dictionary_size > indexes_right_size)){
 		const size_t new_words = dictionary_size - indexes_right_size;
-		for (size_t i { 0 }; i < new_words; ++i) {
+		for (size_t i { 0 }; i < new_words; ++i){
 			indexes_right.push_back(indexes_right_size + i);
 		}
 	}
@@ -358,7 +358,7 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 }
 
 // updates the resume data
-Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
+Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 	Resume updated_resume;
 	updated_resume.position_left = resume.position_left;
 	updated_resume.position_right = resume.position_right;
@@ -371,16 +371,16 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
 	const size_t indexes_left_size = indexes_left.size();
 	const size_t indexes_right_size = indexes_right.size();
 
-	if(!indexes_left.empty() && (dictionary_size > indexes_left_size)) {
+	if(!indexes_left.empty() && (dictionary_size > indexes_left_size)){
 		const size_t new_words = dictionary_size - indexes_left_size;
-		for (size_t i { 0 }; i < new_words; ++i) {
+		for (size_t i { 0 }; i < new_words; ++i){
 			indexes_left.push_back(indexes_left_size + i);
 		}
 	}
 
-	if(!indexes_right.empty() && (dictionary_size > indexes_right_size)) {
+	if(!indexes_right.empty() && (dictionary_size > indexes_right_size)){
 		const size_t new_words = dictionary_size - indexes_right_size;
-		for (size_t i { 0 }; i < new_words; ++i) {
+		for (size_t i { 0 }; i < new_words; ++i){
 			indexes_right.push_back(indexes_right_size + i);
 		}
 	}
@@ -392,7 +392,7 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary) {
 }
 
 // updates practice file
-void update_practice_file(const Practice& practice) {
+void update_practice_file(const Practice& practice){
 	// gets positions and indexes
 	const size_t& position_left = practice.position_left;
 	const size_t& position_right = practice.position_right;
@@ -435,7 +435,7 @@ void write_single_element(const T& t, const string& filename, const string& peri
 	fstream file;
 	file.open(filename, mode);
 
-	if(file.is_open()) {
+	if(file.is_open()){
 		file << t << period;
 		file.close();
 	}
@@ -453,9 +453,9 @@ void write_elements(InputIterator first, const InputIterator last, const string&
     fstream file;
     file.open(filename, mode);
 
-    if(file.is_open()) {
+    if(file.is_open()){
         if(first == last) file << period;
-        else {
+        else{
             for (; first != last; ++first){
                 file << *first << ((first + 1 != last) ? delimiter : period);
             }
@@ -485,11 +485,11 @@ void display_menu(const Dictionary& dictionary, const Practice& practice, const 
 
 	cout << "[1] " << ((position_left_resume != invalid_position)? "Resume " : "") << first_language << "-" << second_language << newline;
 	cout << "[2] " << ((position_right_resume != invalid_position)? "Resume " : "") << second_language << "-" << first_language << newline;
-	if(number_of_questions_left > 0) {
+	if(number_of_questions_left > 0){
 		cout << "[3] " << ((position_left_practice != invalid_position) ? "Resume " : "");
 		cout << "Practice " << first_language << "-" << second_language << " (" << number_of_questions_left << ")" << newline;
 	}
-	if(number_of_questions_right > 0) {
+	if(number_of_questions_right > 0){
 		cout << ((number_of_questions_left == 0) ? "[3] " : "[4] ") << ((position_right_practice != invalid_position) ? "Resume " : "");
 		cout << "Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
 	}
@@ -658,11 +658,11 @@ Dictionary::Mode get_mode_practice(const Practice& practice, const Dictionary::M
 	const Resume resume;
 	const size_t& position = get_position(resume, practice, mode_resume);
 
-	if(is_reverse_mode(mode)) {
+	if(is_reverse_mode(mode)){
 		if(position != invalid_position) return Dictionary::Mode::practice_reverse_resume;
 		else return Dictionary::Mode::practice_reverse;
 	}
-	else {
+	else{
 		if(position != invalid_position) return Dictionary::Mode::practice_normal_resume;
 		else return Dictionary::Mode::practice_normal;
 	}
@@ -697,11 +697,11 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	size_t number_of_consecutive_words { 0 }; 
 
 	// updates resume and practice files
-	if(is_practice_mode(mode)) {
+	if(is_practice_mode(mode)){
 		practice_updated.update_indexes(indexes, mode);
 		update_practice_file(practice_updated);
 	}
-	else {
+	else{
 		resume_updated.update_indexes(indexes, mode);
 		update_resume_file(resume_updated);
 	}
@@ -711,11 +711,11 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 	for(; position < indexes_size; ++position){
 		// updates resume and practice files
-		if(!is_practice_mode(mode)) {
+		if(!is_practice_mode(mode)){
 			resume_updated.update_position(position, mode);
 			update_resume_file(resume_updated);
 		}
-		else {
+		else{
 			practice_updated.update_position(position, mode);
 			update_practice_file(practice_updated);
 		}
@@ -760,7 +760,7 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 			vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
 			if(it != indexes_practice.end()) indexes_practice.erase(it);
 		}
-		else {
+		else{
 			// updates practice indexes
 			if(!is_practice_mode(mode)){
 				vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
@@ -778,11 +778,11 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	}
 
 	// updates resume and practice files
-	if(!is_practice_mode(mode)) {
+	if(!is_practice_mode(mode)){
 		resume_updated.update_position(invalid_position, mode);
 		update_resume_file(resume_updated);
 	}
-	else {
+	else{
 		practice_updated.update_position(invalid_position, mode);
 		update_practice_file(practice_updated);
 	}
