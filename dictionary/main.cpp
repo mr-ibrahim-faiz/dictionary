@@ -5,7 +5,7 @@ using std::runtime_error;
 
 // symbolic names
 constexpr char exit_character { 'x' };
-const string INVALID_CHOICE { "0" };
+const string invalid_choice { "0" };
 
 int main()
 try
@@ -38,7 +38,7 @@ try
 
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
-		if(choice.length() != 1) choice = INVALID_CHOICE;
+		if(choice.length() != 1) choice = invalid_choice;
 
 		char& user_choice = choice[0];
 
@@ -51,7 +51,7 @@ try
 				break;
 
 			case '4':
-				choice = INVALID_CHOICE;
+				choice = invalid_choice;
 				break;
 
 			default:
