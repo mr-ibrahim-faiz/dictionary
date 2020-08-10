@@ -145,7 +145,7 @@ bool is_reverse_mode(const Dictionary::Mode&);
 size_t get_indexes_size_practice(const Practice&, const Dictionary::Mode&);
 
 // gets mode practice
-Dictionary::Mode get_mode_practice(const Dictionary::Mode&);
+Dictionary::Mode get_mode_practice(const Practice&, const Dictionary::Mode&);
 
 // gets indexes practice 
 vector<size_t>& get_indexes_practice(Practice&, const Dictionary::Mode&);

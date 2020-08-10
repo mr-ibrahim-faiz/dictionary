@@ -38,7 +38,7 @@ try
 
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
-		if (choice.length() != 1) choice = INVALID_CHOICE;
+		if(choice.length() != 1) choice = INVALID_CHOICE;
 
 		char& user_choice = choice[0];
 
@@ -65,7 +65,7 @@ try
 		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
 		size_t position = get_position(resume, practice, mode_resume);
 
-		switch (user_choice) {
+		switch(user_choice){
 		case '1': case '2':
 		{
 			cout << newline;
@@ -81,8 +81,8 @@ try
 		{
             cout << newline;
 			if(!indexes.empty()){
-				if (!words.empty()) {
-					if (position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
+				if(!words.empty()){
+					if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 					else quiz_launcher(dictionary, practice, resume, mode_resume);
 				}
 				else cout << "There's not a single word to display.\n";
@@ -99,7 +99,7 @@ try
 			break;
 		}
 
-		if (user_choice == exit_character) break;
+		if(user_choice == exit_character) break;
 		else {
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
