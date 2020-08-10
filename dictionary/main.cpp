@@ -5,7 +5,12 @@ using std::runtime_error;
 
 // symbolic names
 constexpr char exit_character { 'x' };
-const string INVALID_CHOICE { "0" };
+const string invalid_choice { "0" };
+
+// messages
+const string message_empty_list { "There's not a single word to display." };
+const string message_invalid_choice { "Please enter a valid choice." };
+const string message_exit { "Goodbye !" };
 
 int main()
 try
@@ -38,7 +43,7 @@ try
 
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
-		if (choice.length() != 1) choice = INVALID_CHOICE;
+		if(choice.length() != 1) choice = invalid_choice;
 
 		char& user_choice = choice[0];
 
@@ -51,7 +56,7 @@ try
 				break;
 
 			case '4':
-				choice = INVALID_CHOICE;
+				choice = invalid_choice;
 				break;
 
 			default:
@@ -63,9 +68,9 @@ try
 		Dictionary::Mode mode_resume = Dictionary::Mode(int(mode)+4);
 		const vector<string>& words = get_words(dictionary, mode);
 		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
-		size_t position = get_position(resume, mode_resume);
+		size_t position = get_position(resume, practice, mode_resume);
 
-		switch (user_choice) {
+		switch(user_choice){
 		case '1': case '2':
 		{
 			cout << newline;
@@ -73,7 +78,7 @@ try
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
-			else cout << "There's not a single word to display.\n";	
+			else cout << message_empty_list << newline;
 		}
 			break;
 
@@ -81,10 +86,13 @@ try
 		{
             cout << newline;
 			if(!indexes.empty()){
-				if(!words.empty()) quiz_launcher(dictionary, practice, resume, mode);
-				else cout << "There's not a single word to display.\n";
+				if(!words.empty()){
+					if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
+					else quiz_launcher(dictionary, practice, resume, mode_resume);
+				}
+				else cout << message_empty_list << newline;
 			}
-			else cout << "Please enter a valid choice.\n";
+			else cout << message_invalid_choice << newline;
 		}
             break;
 
@@ -92,11 +100,12 @@ try
 			break;
 
 		default:
-			cout << "\nPlease enter a valid choice.\n";
+			cout << newline;
+			cout << message_invalid_choice << newline;
 			break;
 		}
 
-		if (user_choice == exit_character) break;
+		if(user_choice == exit_character) break;
 		else {
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
@@ -120,7 +129,8 @@ try
 		}
 	}
 
-	cout << "\nGoodbye !\n";
+	cout << newline;
+	cout << message_exit << newline;
 
 	return 0;
 }
