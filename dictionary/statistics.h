@@ -1,6 +1,9 @@
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
+#include<iostream>
+using std::pair;
+
 #include<vector>
 using std::vector;
 
@@ -17,8 +20,8 @@ struct Statistics {
 		, failures { failures }{}
 
 	// statistics information
-	vector<size_t> successes; // number of times questions were well answered
-	vector<size_t> failures; // number of times questions were not well answered
+	vector<size_t> successes; // number of times words were well translated
+	vector<size_t> failures; // number of times words were not well translated
 };
 
 #endif
