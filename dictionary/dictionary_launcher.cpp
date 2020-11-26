@@ -375,6 +375,33 @@ void create_file_if(const string& file_address)
 	}
 }
 
+// updates the statistics data
+Statistics update_statistics(const Statistics& statistics, const Dictionary& dictionary){
+	Statistics updated_statistics;
+	vector<size_t> successes = statistics.successes;
+	vector<size_t> failures = statistics.failures;
+
+	// adds newly added words
+	const size_t dictionary_size = dictionary.words_left.size();
+	const size_t successes_size = successes.size();
+
+	if (dictionary_size > successes_size) {
+		const size_t new_words = dictionary_size - successes_size;
+		for (size_t i { 0 }; i < new_words; ++i) {
+			successes.push_back(0);
+			failures.push_back(0);
+		}
+	}
+
+	updated_statistics.successes = successes;
+	updated_statistics.failures = failures;
+
+	// checks the statistics data
+	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
+
+	return updated_statistics;
+}
+
 // updates the practice data
 Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary){
 	Practice updated_practice;
@@ -441,6 +468,25 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 	updated_resume.indexes_right = indexes_right;
 
 	return updated_resume;
+}
+
+// updates the statistics file
+void update_statistics_file(const Statistics& statistics){
+	const vector<size_t>& successes = statistics.successes;
+	const vector<size_t>& failures = statistics.failures;
+
+	// checks the statistics data
+	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
+
+	fstream file;
+	file.open(statistics_file, ios_base::out | ios_base::binary);
+
+	if(file.is_open()){
+		for(size_t i { 0 }; i < successes.size(); ++i)
+			file << successes[i] << delimiter_dictionary << failures[i] << newline;
+		file.close();
+	}
+	else cerr << "Error: Unable to open statistics file.\n";
 }
 
 // updates practice file

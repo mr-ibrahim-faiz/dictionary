@@ -23,6 +23,10 @@ try
 
 	// retrieves statistics information from file
 	Statistics statistics = get_statistics();
+	statistics = update_statistics(statistics, dictionary);
+	update_statistics_file(statistics);
+
+	vector<size_t> ignored_words;
 
 	// retrieves resume information from file
 	Resume resume = get_resume();

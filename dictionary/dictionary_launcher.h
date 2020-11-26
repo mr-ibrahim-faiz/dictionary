@@ -95,11 +95,17 @@ void set_file(const string&, const size_t&);
 // creates file if it doesn't exit
 void create_file_if(const string&);
 
+// updates the statistics data
+Statistics update_statistics(const Statistics&, const Dictionary&);
+
 // updates the practice data
 Practice update_practice(const Practice&, const Resume&, const Dictionary&);
 
 // updates the resume data
 Resume update_resume(const Resume&, const Dictionary&);
+
+// updates the statistics file
+void update_statistics_file(const Statistics&);
 
 // updates practice file
 void update_practice_file(const Practice&);
