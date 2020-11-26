@@ -21,6 +21,9 @@ try
 	// retrieves dictionary information from file
 	Dictionary dictionary = get_dictionary();
 
+	// retrieves statistics information from file
+	Statistics statistics = get_statistics();
+
 	// retrieves resume information from file
 	Resume resume = get_resume();
 

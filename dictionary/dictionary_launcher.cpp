@@ -169,6 +169,37 @@ Dictionary get_dictionary()
 	return dictionary;
 }
 
+// retrieves statistics information from file
+Statistics get_statistics()
+// retrieves statistics information from the statistics file, including the number of times a word was well translated.
+{
+	Statistics statistics;
+	vector<size_t>& successes = statistics.successes;
+	vector<size_t>& failures = statistics.failures;
+
+	fstream file(statistics_file, ios_base::in | ios_base::binary);
+
+	if (file.is_open()){
+		// retrieves number of times words were well translated
+		size_t number { 0 };
+
+		while(file >> number){
+			successes.push_back(number);
+			file.ignore(1);
+			file >> number;
+			failures.push_back(number);
+		}
+
+		file.close();
+	}
+	else cerr << "Error: Unable to open statistics file.\n";
+
+	// checks the statistics data
+	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
+
+	return statistics;
+}
+
 // retrieves practice information from file
 Practice get_practice()
 // retrieves the indexes of questions to practice

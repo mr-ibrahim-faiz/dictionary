@@ -56,6 +56,9 @@ const string end_period_file = get_end_period_file();
 // retrieves dictionary information from file
 Dictionary get_dictionary();
 
+// retrieves statistics information from file
+Statistics get_statistics();
+
 // retrieves practice information from file
 Practice get_practice();
 
