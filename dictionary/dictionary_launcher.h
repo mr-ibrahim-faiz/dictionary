@@ -166,6 +166,9 @@ Dictionary::Mode get_mode_practice(const Practice&, const Dictionary::Mode&);
 // gets indexes practice 
 vector<size_t>& get_indexes_practice(Practice&, const Dictionary::Mode&);
 
+// gets ignored words
+vector<size_t> get_ignored_words(const Statistics&, const Dictionary::Mode&);
+
 // quiz launcher
 Practice quiz_launcher(const Dictionary&, const Practice&, const Resume&, const Dictionary::Mode&);
 

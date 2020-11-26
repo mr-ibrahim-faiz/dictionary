@@ -77,11 +77,15 @@ try
 		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
 		size_t position = get_position(resume, practice, mode_resume);
 
+		// retrieves ignored words
+		ignored_words = get_ignored_words(statistics, mode);
+
 		switch(user_choice){
 		case '1': case '2':
 		{
 			cout << newline;
 			if(!words.empty()){
+				if(ignored_words.size() == words.size()) cout << "Well done. The Success threshold has been exceeded!\n";
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}

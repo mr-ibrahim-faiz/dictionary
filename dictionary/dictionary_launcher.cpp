@@ -24,6 +24,7 @@ constexpr char whitespace { ' ' };
 constexpr char delimiter_dictionary { ':' };
 constexpr char end_of_line { '$' };
 
+constexpr int success_threshold { 10 };
 constexpr size_t minimum_number_of_words { 10 }; // minimum number of words that triggers practice mmode
 constexpr size_t initial_position { 0 };
 
@@ -778,6 +779,19 @@ vector<size_t>& get_indexes_practice(Practice& practice, const Dictionary::Mode&
 	return practice.indexes_right;
 }
 
+// gets ignored words
+vector<size_t> get_ignored_words(const Statistics& statistics, const Dictionary::Mode& mode){
+	vector<size_t> ignored_words;
+	const vector<pair<size_t, size_t>>& successes = statistics.successes;
+	const vector<pair<size_t, size_t>>& failures = statistics.failures;
+	for(size_t i = 0; i < successes.size(); ++i){
+		const int success = (int)(is_normal_mode(mode)? successes[i].first : successes[i].second);
+		const int failure = (int)(is_normal_mode(mode)? failures[i].first : failures[i].second);
+		if(success - failure > success_threshold) ignored_words.push_back(i);
+	}
+	return ignored_words;
+}
+
 // quiz launcher
 Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, const Resume& resume, const Dictionary::Mode& mode)
 // displays a word, wait for the user's answer,
@@ -855,6 +869,11 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 		const size_t& index = indexes[position];
 		const string& word = words_left[index];
+
+		// words that exceeds the susccess threshold are ignored
+		const int success = (int)(is_normal_mode(mode)? successes[index].first : successes[index].second);
+		const int failure = (int)(is_normal_mode(mode)? failures[index].first : failures[index].second);
+		if(success - failure > success_threshold) continue;
 
 		const size_t maximum_number_of_words = 2*minimum_number_of_words;
 		bool must_add_newline = !(number_of_consecutive_words%maximum_number_of_words) && (number_of_consecutive_words != 0);
