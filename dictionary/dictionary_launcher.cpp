@@ -785,6 +785,14 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
     const vector<string>& words_left = get_words_left(dictionary, mode);
     const vector<string>& words_right = get_words_right(dictionary, mode);
 
+	// retrieves the statistics information
+	Statistics statistics = get_statistics();
+	statistics = update_statistics(statistics, dictionary);
+	update_statistics_file(statistics);
+
+	vector<size_t>& successes = statistics.successes;
+	vector<size_t>& failures = statistics.failures;
+
 	// retrieves resume information
 	Resume resume_updated = resume;
 
