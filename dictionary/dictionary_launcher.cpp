@@ -33,6 +33,7 @@ const string exit_sequence { ":exit" };
 const string dictionary_filename { "dictionary.txt" };
 const string practice_filename { "practice.txt" };
 const string resume_filename { "resume.txt" };
+const string statistics_file { "statistics.txt" };
 
 // converts a wstring to an UTF8 string
 string to_u8string(const wstring& source){
@@ -274,6 +275,7 @@ void set_required_files()
 	set_dictionary_file();
 	set_practice_file();
 	set_resume_file();
+	set_statistics_file();
 }
 
 // sets dictionary file
@@ -302,6 +304,11 @@ void set_practice_file(){
 // sets resume file
 void set_resume_file(){
 	set_file(resume_filename, 4);
+}
+
+// sets statistics file
+void set_statistics_file(){
+	create_file_if(statistics_file);
 }
 
 // sets file

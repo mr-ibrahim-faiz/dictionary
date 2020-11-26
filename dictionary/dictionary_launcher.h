@@ -83,6 +83,9 @@ void set_practice_file();
 // sets resume file
 void set_resume_file();
 
+// sets statistics file
+void set_statistics_file();
+
 // sets file
 void set_file(const string&, const size_t&);
 
