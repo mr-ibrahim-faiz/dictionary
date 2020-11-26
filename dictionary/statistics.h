@@ -15,13 +15,13 @@ struct Statistics {
 		, failures {}{}
 
 	// constructor taking number of successes and failures as arguments
-	explicit Statistics(const vector<size_t>& successes, const vector<size_t>& failures) noexcept
+	explicit Statistics(const vector<pair<size_t, size_t>>& successes, const vector<pair<size_t, size_t>>& failures) noexcept
 		: successes { successes }
 		, failures { failures }{}
 
 	// statistics information
-	vector<size_t> successes; // number of times words were well translated
-	vector<size_t> failures; // number of times words were not well translated
+	vector<pair<size_t, size_t>> successes; // number of times words were well translated
+	vector<pair<size_t, size_t>> failures; // number of times words were not well translated
 };
 
 #endif

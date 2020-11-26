@@ -174,19 +174,23 @@ Statistics get_statistics()
 // retrieves statistics information from the statistics file, including the number of times a word was well translated.
 {
 	Statistics statistics;
-	vector<size_t>& successes = statistics.successes;
-	vector<size_t>& failures = statistics.failures;
+	vector<pair<size_t, size_t>>& successes = statistics.successes;
+	vector<pair<size_t, size_t>>& failures = statistics.failures;
 
 	fstream file(statistics_file, ios_base::in | ios_base::binary);
 
 	if (file.is_open()){
 		// retrieves number of times words were well translated
-		size_t number { 0 };
+		pair<size_t, size_t> number;
 
-		while(file >> number){
+		while(file >> number.first){
+			file.ignore(1);
+			file >> number.second;
 			successes.push_back(number);
 			file.ignore(1);
-			file >> number;
+			file >> number.first;
+			file.ignore(1);
+			file >> number.second;
 			failures.push_back(number);
 		}
 
@@ -378,8 +382,8 @@ void create_file_if(const string& file_address)
 // updates the statistics data
 Statistics update_statistics(const Statistics& statistics, const Dictionary& dictionary){
 	Statistics updated_statistics;
-	vector<size_t> successes = statistics.successes;
-	vector<size_t> failures = statistics.failures;
+	vector<pair<size_t, size_t>> successes = statistics.successes;
+	vector<pair<size_t, size_t>> failures = statistics.failures;
 
 	// adds newly added words
 	const size_t dictionary_size = dictionary.words_left.size();
@@ -388,8 +392,9 @@ Statistics update_statistics(const Statistics& statistics, const Dictionary& dic
 	if (dictionary_size > successes_size) {
 		const size_t new_words = dictionary_size - successes_size;
 		for (size_t i { 0 }; i < new_words; ++i) {
-			successes.push_back(0);
-			failures.push_back(0);
+			pair<size_t, size_t> default_pair;
+			successes.push_back(default_pair);
+			failures.push_back(default_pair);
 		}
 	}
 
@@ -398,6 +403,7 @@ Statistics update_statistics(const Statistics& statistics, const Dictionary& dic
 
 	// checks the statistics data
 	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
+	if(successes.size() != dictionary_size) throw runtime_error("(statistics) corrupted data.");
 
 	return updated_statistics;
 }
@@ -472,8 +478,8 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 
 // updates the statistics file
 void update_statistics_file(const Statistics& statistics){
-	const vector<size_t>& successes = statistics.successes;
-	const vector<size_t>& failures = statistics.failures;
+	const vector<pair<size_t, size_t>>& successes = statistics.successes;
+	const vector<pair<size_t, size_t>>& failures = statistics.failures;
 
 	// checks the statistics data
 	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
@@ -483,7 +489,7 @@ void update_statistics_file(const Statistics& statistics){
 
 	if(file.is_open()){
 		for(size_t i { 0 }; i < successes.size(); ++i)
-			file << successes[i] << delimiter_dictionary << failures[i] << newline;
+			file << successes[i].first << delimiter_dictionary << successes[i].second << delimiter_dictionary << failures[i].first << delimiter_dictionary << failures[i].second << newline;
 		file.close();
 	}
 	else cerr << "Error: Unable to open statistics file.\n";
@@ -790,8 +796,8 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	statistics = update_statistics(statistics, dictionary);
 	update_statistics_file(statistics);
 
-	vector<size_t>& successes = statistics.successes;
-	vector<size_t>& failures = statistics.failures;
+	vector<pair<size_t, size_t>>& successes = statistics.successes;
+	vector<pair<size_t, size_t>>& failures = statistics.failures;
 
 	// retrieves resume information
 	Resume resume_updated = resume;
@@ -816,6 +822,10 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	size_t factor = indexes_size_practice / minimum_number_of_words + 1;
 
 	for(; position < indexes_size; ++position){
+		// updates statistics file
+		statistics = update_statistics(statistics, dictionary);
+		update_statistics_file(statistics);
+
 		// updates resume and practice files
 		if(!is_practice_mode(mode)){
 			resume_updated.update_position(position, mode);
@@ -856,17 +866,31 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		string user_answer = get_answer();
 
 		// quits program
-		if(user_answer == exit_sequence) return practice_updated;
+		if(user_answer == exit_sequence){
+			// updates statistics file
+			statistics = update_statistics(statistics, dictionary);
+			update_statistics_file(statistics);
+
+			return practice_updated;
+		}
 
 		const string& right_answer = words_right[index];
 
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
+			// updates statistics data
+			if(is_normal_mode(mode)) successes[index].first = successes[index].first + 1;
+			else successes[index].second = successes[index].second + 1;
+
 			// removes the word index from the practice list if present
 			vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
 			if(it != indexes_practice.end()) indexes_practice.erase(it);
 		}
 		else{
+			// updates statistics data
+			if(is_normal_mode(mode)) failures[index].first = failures[index].first + 1;
+			else failures[index].second = failures[index].second + 1;
+
 			// updates practice indexes
 			if(!is_practice_mode(mode)){
 				vector<size_t>::iterator it = find(indexes_practice.begin(), indexes_practice.end(), index);
@@ -882,6 +906,10 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 		// updates practice file
 		update_practice_file(practice_updated);
 	}
+
+	// updates statistics file
+	statistics = update_statistics(statistics, dictionary);
+	update_statistics_file(statistics);
 
 	// updates resume and practice files
 	if(!is_practice_mode(mode)){

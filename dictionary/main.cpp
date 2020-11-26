@@ -117,11 +117,18 @@ try
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
 
+			// retrieves statistics information from file
+			statistics = get_statistics();
+
 			// retrieves resume information from file
 			resume = get_resume();
 
 			// retrieves practice information from file
 			practice = get_practice();
+
+			// updates statistics file
+			statistics = update_statistics(statistics, dictionary);
+			update_statistics_file(statistics);
 
 			// updates practice file
 			practice = update_practice(practice, resume, dictionary);
