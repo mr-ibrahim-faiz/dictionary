@@ -4,6 +4,7 @@
 #include "dictionary.h"
 #include "practice.h"
 #include "resume.h"
+#include "statistics.h"
 
 #include<iostream>
 using std::cin;
@@ -43,6 +44,9 @@ const string end_period_file = get_end_period_file();
 // retrieves dictionary information from file
 Dictionary get_dictionary();
 
+// retrieves statistics information from file
+Statistics get_statistics();
+
 // retrieves practice information from file
 Practice get_practice();
 
@@ -70,14 +74,26 @@ void set_practice_file();
 // sets resume file
 void set_resume_file();
 
+// sets statistics file
+void set_statistics_file();
+
 // sets file
 void set_file(const string&, const size_t&);
+
+// creates file if it doesn't exit
+void create_file_if(const string&);
+
+// updates the statistics data
+Statistics update_statistics(const Statistics&, const Dictionary&);
 
 // updates the practice data
 Practice update_practice(const Practice&, const Resume&, const Dictionary&);
 
 // updates the resume data
 Resume update_resume(const Resume&, const Dictionary&);
+
+// updates the statistics file
+void update_statistics_file(const Statistics&);
 
 // updates practice file
 void update_practice_file(const Practice&);
@@ -140,6 +156,9 @@ Dictionary::Mode get_mode_practice(const Practice&, const Dictionary::Mode&);
 
 // gets indexes practice 
 vector<size_t>& get_indexes_practice(Practice&, const Dictionary::Mode&);
+
+// gets ignored words
+vector<size_t> get_ignored_words(const Statistics&, const Dictionary::Mode&);
 
 // quiz launcher
 Practice quiz_launcher(const Dictionary&, const Practice&, const Resume&, const Dictionary::Mode&);

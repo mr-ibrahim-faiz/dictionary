@@ -21,6 +21,13 @@ try
 	// retrieves dictionary information from file
 	Dictionary dictionary = get_dictionary();
 
+	// retrieves statistics information from file
+	Statistics statistics = get_statistics();
+	statistics = update_statistics(statistics, dictionary);
+	update_statistics_file(statistics);
+
+	vector<size_t> ignored_words;
+
 	// retrieves resume information from file
 	Resume resume = get_resume();
 
@@ -70,11 +77,15 @@ try
 		const vector<size_t>& indexes = get_indexes_practice(practice, mode);
 		size_t position = get_position(resume, practice, mode_resume);
 
+		// retrieves ignored words
+		ignored_words = get_ignored_words(statistics, mode);
+
 		switch(user_choice){
 		case '1': case '2':
 		{
 			cout << newline;
 			if(!words.empty()){
+				if(ignored_words.size() == words.size()) cout << "Well done. The Success threshold has been exceeded!\n";
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
@@ -110,11 +121,18 @@ try
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
 
+			// retrieves statistics information from file
+			statistics = get_statistics();
+
 			// retrieves resume information from file
 			resume = get_resume();
 
 			// retrieves practice information from file
 			practice = get_practice();
+
+			// updates statistics file
+			statistics = update_statistics(statistics, dictionary);
+			update_statistics_file(statistics);
 
 			// updates practice file
 			practice = update_practice(practice, resume, dictionary);
