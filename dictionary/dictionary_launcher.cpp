@@ -323,6 +323,20 @@ void set_file(const string& filename, const size_t& number_of_lines)
     }
 }
 
+// creates file if it doesn't exit
+void create_file_if(const string& file_address)
+// create the file if it doesn't exit
+{
+	fstream file;
+	file.open(file_address, ios_base::in | ios_base::binary);
+
+	if (file.is_open()) file.close();
+	else {
+		file.open(file_address, ios_base::out | ios_base::binary);
+		if(file.is_open()) file.close();
+	}
+}
+
 // updates the practice data
 Practice update_practice(const Practice& practice, const Resume& resume, const Dictionary& dictionary){
 	Practice updated_practice;

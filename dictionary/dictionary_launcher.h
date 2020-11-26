@@ -4,6 +4,7 @@
 #include "dictionary.h"
 #include "practice.h"
 #include "resume.h"
+#include "statistics.h"
 
 #include<iostream>
 using std::cin;
@@ -84,6 +85,9 @@ void set_resume_file();
 
 // sets file
 void set_file(const string&, const size_t&);
+
+// creates file if it doesn't exit
+void create_file_if(const string&);
 
 // updates the practice data
 Practice update_practice(const Practice&, const Resume&, const Dictionary&);
