@@ -1,7 +1,5 @@
 dictionary/dictionary
-dictionary/dictionary.txt
-dictionary/practice.txt
-dictionary/resume.txt
+dictionary/*.txt
 dictionary/*.exe
 /dictionary/x64/Release
 /dictionary/.vs/dictionary/v15
