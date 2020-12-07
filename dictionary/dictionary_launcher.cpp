@@ -824,6 +824,9 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 	size_t indexes_size_practice = get_indexes_size_practice(practice_updated, mode);
 	size_t factor = indexes_size_practice / minimum_number_of_words + 1;
 
+	// keeps track of the number of words removed from practice list
+	size_t removed { 0 };
+
 	for(; position < indexes_size; ++position){
 		// updates statistics file
 		statistics = update_statistics(statistics, dictionary);
@@ -875,6 +878,13 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 		// quits program
 		if(user_answer == exit_sequence){
+			// updates practice file
+			if(is_practice_mode(mode)){
+				position -= removed;
+				practice_updated.update_position(position, mode);
+				update_practice_file(practice_updated);
+			}
+
 			// updates statistics file
 			statistics = update_statistics(statistics, dictionary);
 			update_statistics_file(statistics);
@@ -886,6 +896,9 @@ Practice quiz_launcher(const Dictionary& dictionary, const Practice& practice, c
 
 		// checks if the word should be removed from the practice list
 		if(user_answer == right_answer){
+			// updates the number of words removed from practice list
+			if(is_practice_mode(mode)) ++removed;
+
 			// updates statistics data
 			if(is_normal_mode(mode)) successes[index].first = successes[index].first + 1;
 			else successes[index].second = successes[index].second + 1;
