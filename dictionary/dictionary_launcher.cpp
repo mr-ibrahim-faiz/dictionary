@@ -598,6 +598,7 @@ void display_menu(const Dictionary& dictionary, const Practice& practice, const 
 		cout << ((number_of_questions_left == 0) ? "[3] " : "[4] ") << ((position_right_practice != invalid_position) ? "Resume " : "");
 		cout << "Practice " << second_language << "-" << first_language << " (" << number_of_questions_right << ")" << newline;
 	}
+	cout << "[u] Updater" << newline;
 	cout << "[x] Exit" << newline;
 }
 
