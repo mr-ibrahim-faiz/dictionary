@@ -4,8 +4,7 @@
 using std::runtime_error;
 
 // symbolic names
-constexpr char exit_character { 'x' };
-const string invalid_choice { "0" };
+constexpr char updater_choice { 'u' };
 
 // messages
 const string message_empty_list { "There's not a single word to display." };
@@ -50,7 +49,7 @@ try
 
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
-		if(choice.length() != 1) choice = invalid_choice;
+		if(choice.length() != valid_choice_length) choice = invalid_choice;
 
 		char& user_choice = choice[0];
 
@@ -80,22 +79,24 @@ try
 		// retrieves ignored words
 		ignored_words = get_ignored_words(statistics, mode);
 
+		// clears screen
+		if(user_choice != exit_choice) [[maybe_unused]] int result = system(clear_command.c_str());
+
 		switch(user_choice){
 		case '1': case '2':
 		{
-			cout << newline;
 			if(!words.empty()){
 				if(ignored_words.size() == words.size()) cout << "Well done. The Success threshold has been exceeded!\n";
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
 			else cout << message_empty_list << newline;
+			cout << newline;
 		}
 			break;
 
 		case '3': case '4':
 		{
-            cout << newline;
 			if(!indexes.empty()){
 				if(!words.empty()){
 					if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
@@ -104,19 +105,29 @@ try
 				else cout << message_empty_list << newline;
 			}
 			else cout << message_invalid_choice << newline;
+			cout << newline;
 		}
             break;
 
-		case exit_character:
+		case updater_choice:
+		{
+			// launches statistics updater
+			statistics_updater();
+
+			// clears screen
+			[[maybe_unused]] int result = system(clear_command.c_str());
+		}
+			break;
+
+		case exit_choice:
 			break;
 
 		default:
-			cout << newline;
-			cout << message_invalid_choice << newline;
+			cout << message_invalid_choice << "\n\n";
 			break;
 		}
 
-		if(user_choice == exit_character) break;
+		if(user_choice == exit_choice) break;
 		else {
 			// retrieves dictionary information from file
 			dictionary = get_dictionary();
@@ -142,7 +153,6 @@ try
 			resume = update_resume(resume, dictionary);
 			update_resume_file(resume);
 
-			cout << newline;
 			display_menu(dictionary, practice, resume);
 		}
 	}
