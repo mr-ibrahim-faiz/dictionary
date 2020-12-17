@@ -24,4 +24,10 @@ struct Statistics {
 	vector<pair<size_t, size_t>> failures; // number of times words were not well translated
 };
 
+// displays statistics menu
+void display_updater_menu();
+
+// statistics updater
+void statistics_updater();
+
 #endif
