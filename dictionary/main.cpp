@@ -1,3 +1,4 @@
+#include "updater.h"
 #include "dictionary_launcher.h"
 
 #include<stdexcept>
@@ -111,8 +112,8 @@ try
 
 		case updater_choice:
 		{
-			// launches statistics updater
-			statistics_updater();
+			// launches updater
+			updater();
 
 			// clears screen
 			[[maybe_unused]] int result = system(clear_command.c_str());
