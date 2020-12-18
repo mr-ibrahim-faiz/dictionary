@@ -47,7 +47,7 @@ void statistics_updater(){
 	// gets user's choice
 	for(string choice; getline(cin, choice);){
 		const char& user_choice = choice[0];
-			
+
 		// retrieves mode
 		Dictionary::Mode mode = Dictionary::Mode(int(user_choice-'0')-1);
 
@@ -76,7 +76,7 @@ void statistics_updater(){
 			// updates resume file
 			resume = update_resume(resume, dictionary);
 			update_resume_file(resume);
-		
+
 			// retrieves ignored words
 			ignored_words = get_ignored_words(statistics, mode);
 		}
