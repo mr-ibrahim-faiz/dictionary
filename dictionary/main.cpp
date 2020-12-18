@@ -10,6 +10,7 @@ constexpr char updater_choice { 'u' };
 // messages
 const string message_empty_list { "There's not a single word to display." };
 const string message_invalid_choice { "Please enter a valid choice." };
+const string message_success_threshold_exceeded { "Well done. The Success threshold has been exceeded!" };
 const string message_exit { "Goodbye !" };
 
 int main()
@@ -87,7 +88,7 @@ try
 		case '1': case '2':
 		{
 			if(!words.empty()){
-				if(ignored_words.size() == words.size()) cout << "Well done. The Success threshold has been exceeded!\n";
+				if(ignored_words.size() == words.size()) cout << message_success_threshold_exceeded << newline;
 				if(position == invalid_position) quiz_launcher(dictionary, practice, resume, mode);
 				else quiz_launcher(dictionary, practice, resume, mode_resume);
 			}
@@ -124,7 +125,8 @@ try
 			break;
 
 		default:
-			cout << message_invalid_choice << "\n\n";
+			cout << message_invalid_choice << newline;
+			cout << newline;
 			break;
 		}
 
