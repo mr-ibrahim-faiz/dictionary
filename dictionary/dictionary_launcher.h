@@ -34,7 +34,11 @@ string get_end_period_file();
 
 // symbolic names
 constexpr char newline { '\n' };
+constexpr char exit_choice { 'x' };
+constexpr size_t valid_choice_length = 1;
 constexpr size_t invalid_position = numeric_limits<unsigned int>::max();
+const string invalid_choice { "0" };
+const string clear_command { "clear" };
 
 // file delimiter and periods
 const string delimiter_file = get_delimiter_file();
