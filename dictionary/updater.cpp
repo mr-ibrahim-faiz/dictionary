@@ -5,6 +5,10 @@
 using std::cin;
 using std::cout;
 
+// messages
+const string message_list_cleared { "The ignored words list has been cleared." };
+const string message_invalid_choice { "Please enter a valid choice." };
+
 // displays updater menu
 void display_updater_menu(){
 	// retrieves dictionary information from file
@@ -107,14 +111,16 @@ void updater(){
 				ignored_words = get_ignored_words(statistics, mode);
 			}
 			update_statistics_file(statistics);
-			cout << "The ignored words list has been cleared.\n\n";
+			cout << message_list_cleared << newline;
+			cout << newline;
 			break;
 
 		case exit_choice:
 			break;
 
 		default:
-			cout << "Please enter a valid choice.\n\n";
+			cout << message_invalid_choice << newline;
+			cout << newline;
 			break;
 		}
 
