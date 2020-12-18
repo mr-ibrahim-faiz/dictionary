@@ -1,5 +1,6 @@
 dictionary/dictionary
 dictionary/*.txt
+dictionary/*.exe
 dictionary/practice.txt
 dictionary/resume.txt
 dictionary/.vs/
