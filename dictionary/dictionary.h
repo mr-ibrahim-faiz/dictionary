@@ -24,6 +24,9 @@ struct Dictionary {
 	vector<string> words_left;
 	vector<string> words_right;
 
+	// removed words
+	vector<size_t> removed;
+
 	// modes
 	enum class Mode {
 		normal, reverse, practice_normal, practice_reverse, normal_resume, reverse_resume, practice_normal_resume, practice_reverse_resume
