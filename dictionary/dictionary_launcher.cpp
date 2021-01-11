@@ -29,12 +29,14 @@ constexpr size_t minimum_number_of_words { 10 }; // minimum number of words that
 constexpr size_t initial_position { 0 };
 
 const string exit_sequence { ":exit" };
+const string empty_line { ":" };
 
 // file names
 const string dictionary_filename { "dictionary.txt" };
 const string practice_filename { "practice.txt" };
 const string resume_filename { "resume.txt" };
-const string statistics_file { "statistics.txt" };
+const string statistics_filename { "statistics.txt" };
+const string temporary_filename { "dictionary_temp.txt" };
 
 // converts a wstring to an UTF8 string
 string to_u8string(const wstring& source){
@@ -145,6 +147,7 @@ Dictionary get_dictionary()
 	string& second_language = dictionary.second_language;
 	vector<string>& words_left = dictionary.words_left;
 	vector<string>& words_right = dictionary.words_right;
+	vector<size_t>& removed = dictionary.removed;
 
 	fstream file(dictionary_filename, ios_base::in | ios_base::binary);
 	if(file.is_open()){
@@ -154,9 +157,13 @@ Dictionary get_dictionary()
 		getline(file, second_language);
 
 		// gets words and their translations
-		for(string word; getline(file, word, delimiter_dictionary);){
+		for(pair<string, size_t> word_and_index; getline(file, word_and_index.first, delimiter_dictionary); ++word_and_index.second){
+			string& word = word_and_index.first;
+			size_t& index = word_and_index.second;
+
 			if(!word.empty()) words_left.push_back(word);
-			file >> ws;
+			else removed.insert(removed.begin(), index); // an empty word is considered "removed"
+			if(file.peek() != newline) file >> ws;
 
 			word.clear();
 			getline(file, word);
@@ -167,6 +174,8 @@ Dictionary get_dictionary()
 		// checks if the dictionary is valid
 		if(words_left.size() != words_right.size()) throw runtime_error("(retrieve words) size mismatch.");
 	}
+	for(auto index: removed) std::cout << index << newline; // TEST
+	getchar();
 	return dictionary;
 }
 
@@ -178,7 +187,7 @@ Statistics get_statistics()
 	vector<pair<size_t, size_t>>& successes = statistics.successes;
 	vector<pair<size_t, size_t>>& failures = statistics.failures;
 
-	fstream file(statistics_file, ios_base::in | ios_base::binary);
+	fstream file(statistics_filename, ios_base::in | ios_base::binary);
 
 	if (file.is_open()){
 		// retrieves number of times words were well translated
@@ -344,7 +353,7 @@ void set_resume_file(){
 
 // sets statistics file
 void set_statistics_file(){
-	create_file_if(statistics_file);
+	create_file_if(statistics_filename);
 }
 
 // sets file
@@ -386,6 +395,15 @@ Statistics update_statistics(const Statistics& statistics, const Dictionary& dic
 	vector<pair<size_t, size_t>> successes = statistics.successes;
 	vector<pair<size_t, size_t>> failures = statistics.failures;
 
+	const vector<size_t>& removed = dictionary.removed;
+
+	// removes words
+	for (size_t i { 0 }; i < removed.size(); ++i) {
+		const size_t& removed_index = removed[i];
+		successes.erase(successes.begin() + (int) removed_index);
+		failures.erase(failures.begin() + (int) removed_index);
+	}
+
 	// adds newly added words
 	const size_t dictionary_size = dictionary.words_left.size();
 	const size_t successes_size = successes.size();
@@ -417,6 +435,41 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 
 	vector<size_t> indexes_left = practice.indexes_left;
 	vector<size_t> indexes_right = practice.indexes_right;
+
+	const vector<size_t>& removed = dictionary.removed;
+
+	// removes words
+	for(size_t i { 0 }; i < removed.size(); ++i) {
+		const size_t& removed_index = removed[i];
+		size_t& updated_position_left = updated_practice.position_left;
+		size_t& updated_position_right = updated_practice.position_right;
+
+		vector<size_t> updated_indexes_left;
+		for (size_t j { 0 }; j < indexes_left.size(); ++j) {
+			const size_t& index = indexes_left[j];
+
+			if (index != removed_index) {
+				updated_indexes_left.push_back((index > removed_index) ? index - 1 : index);
+			}
+			else {
+				if(updated_position_left != invalid_position && updated_position_left > j) --updated_position_left;
+			}
+		}
+		indexes_left = updated_indexes_left;
+
+		vector<size_t> updated_indexes_right;
+		for (size_t j { 0 }; j < indexes_right.size(); ++j) {
+			const size_t& index = indexes_right[j];
+
+			if (index != removed_index) {
+				updated_indexes_right.push_back((index > removed_index) ? index - 1 : index);
+			}
+			else {
+				if(updated_position_right != invalid_position && updated_position_right > j) --updated_position_right;
+			}
+		}
+		indexes_right = updated_indexes_right;
+	}
 
 	// adds newly added words
 	const size_t dictionary_size = dictionary.words_left.size();
@@ -452,6 +505,41 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 	vector<size_t> indexes_left = resume.indexes_left;
 	vector<size_t> indexes_right = resume.indexes_right;
 
+	const vector<size_t>& removed = dictionary.removed;
+
+	// removes words
+	for(size_t i { 0 }; i < removed.size(); ++i) {
+		const size_t& removed_index = removed[i];
+		size_t& updated_position_left = updated_resume.position_left;
+		size_t& updated_position_right = updated_resume.position_right;
+
+		vector<size_t> updated_indexes_left;
+		for (size_t j { 0 }; j < indexes_left.size(); ++j) {
+			const size_t& index = indexes_left[j];
+
+			if (index != removed_index) {
+				updated_indexes_left.push_back((index > removed_index) ? index - 1 : index);
+			}
+			else {
+				if(updated_position_left != invalid_position && updated_position_left > j) --updated_position_left;
+			}
+		}
+		indexes_left = updated_indexes_left;
+
+		vector<size_t> updated_indexes_right;
+		for (size_t j { 0 }; j < indexes_right.size(); ++j) {
+			const size_t& index = indexes_right[j];
+
+			if (index != removed_index) {
+				updated_indexes_right.push_back((index > removed_index) ? index - 1 : index);
+			}
+			else {
+				if(updated_position_right != invalid_position && updated_position_right > j) --updated_position_right;
+			}
+		}
+		indexes_right = updated_indexes_right;
+	}
+
 	// adds newly added words
 	const size_t dictionary_size = dictionary.words_left.size();
 	const size_t indexes_left_size = indexes_left.size();
@@ -486,7 +574,7 @@ void update_statistics_file(const Statistics& statistics){
 	if(successes.size() != failures.size()) throw runtime_error("(statistics) size mismatch.");
 
 	fstream file;
-	file.open(statistics_file, ios_base::out | ios_base::binary);
+	file.open(statistics_filename, ios_base::out | ios_base::binary);
 
 	if(file.is_open()){
 		for(size_t i { 0 }; i < successes.size(); ++i)
@@ -529,6 +617,33 @@ void update_resume_file(const Resume& resume){
 	// saves indexes
 	write_elements(indexes_left.begin(), indexes_left.end(), resume_filename, delimiter_file, period_file, ios_base::app | ios_base::binary);
 	write_elements(indexes_right.begin(), indexes_right.end(), resume_filename, delimiter_file, end_period_file, ios_base::app | ios_base::binary);
+}
+
+// updates the dictionary file
+void update_dictionary_file()
+// removes empty words from file
+{
+	fstream source(dictionary_filename, ios_base::in | ios_base::binary);
+
+	if(source.is_open()) {
+		fstream destination(temporary_filename, ios_base::out | ios_base::binary);
+
+		if (destination.is_open()) {
+			for (string word; getline(source, word);) {
+				if (word != empty_line) {
+					destination << word << newline;
+				}
+				else source >> ws;
+			}
+			destination.close();
+		}
+		else cerr << "Error: Unable to open destination file.\n";
+		source.close();
+	}
+	else cerr << "Error: Unable to open source file.\n";
+
+	remove(dictionary_filename.c_str());
+	rename(temporary_filename.c_str(), dictionary_filename.c_str());
 }
 
 // writes a single element on a file
