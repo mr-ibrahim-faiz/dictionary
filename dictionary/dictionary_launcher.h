@@ -105,6 +105,9 @@ void update_practice_file(const Practice&);
 // updates resume file
 void update_resume_file(const Resume&);
 
+// updates the dictionary file
+void update_dictionary_file();
+
 // writes a single element on a file
 template<typename T>
 void write_single_element(const T&, const string&, const string& period, const ios_base::openmode& = ios_base::out | ios_base::binary);

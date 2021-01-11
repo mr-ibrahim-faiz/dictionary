@@ -21,6 +21,7 @@ try
 
 	// retrieves dictionary information from file
 	Dictionary dictionary = get_dictionary();
+	if (!dictionary.removed.empty()) update_dictionary_file();
 
 	// retrieves statistics information from file
 	Statistics statistics = get_statistics();
