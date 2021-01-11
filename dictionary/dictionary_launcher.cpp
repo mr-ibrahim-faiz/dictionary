@@ -174,8 +174,6 @@ Dictionary get_dictionary()
 		// checks if the dictionary is valid
 		if(words_left.size() != words_right.size()) throw runtime_error("(retrieve words) size mismatch.");
 	}
-	for(auto index: removed) std::cout << index << newline; // TEST
-	getchar();
 	return dictionary;
 }
 
@@ -247,11 +245,11 @@ Practice get_practice()
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
 		// gets indexes
-		for (size_t index = 0; file >> index; indexes_left.push_back(index));
+		for(size_t index = 0; file >> index; indexes_left.push_back(index));
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
-		for (size_t index = 0; file >> index; indexes_right.push_back(index));
+		for(size_t index = 0; file >> index; indexes_right.push_back(index));
 		file.clear();
 		file.ignore(numeric_limits<streamsize>::max(), end_of_line);
 
@@ -398,7 +396,7 @@ Statistics update_statistics(const Statistics& statistics, const Dictionary& dic
 	const vector<size_t>& removed = dictionary.removed;
 
 	// removes words
-	for (size_t i { 0 }; i < removed.size(); ++i) {
+	for(size_t i { 0 }; i < removed.size(); ++i){
 		const size_t& removed_index = removed[i];
 		successes.erase(successes.begin() + (int) removed_index);
 		failures.erase(failures.begin() + (int) removed_index);
@@ -408,9 +406,9 @@ Statistics update_statistics(const Statistics& statistics, const Dictionary& dic
 	const size_t dictionary_size = dictionary.words_left.size();
 	const size_t successes_size = successes.size();
 
-	if (dictionary_size > successes_size) {
+	if (dictionary_size > successes_size){
 		const size_t new_words = dictionary_size - successes_size;
-		for (size_t i { 0 }; i < new_words; ++i) {
+		for(size_t i { 0 }; i < new_words; ++i){
 			pair<size_t, size_t> default_pair;
 			successes.push_back(default_pair);
 			failures.push_back(default_pair);
@@ -439,16 +437,16 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 	const vector<size_t>& removed = dictionary.removed;
 
 	// removes words
-	for(size_t i { 0 }; i < removed.size(); ++i) {
+	for(size_t i { 0 }; i < removed.size(); ++i){
 		const size_t& removed_index = removed[i];
 		size_t& updated_position_left = updated_practice.position_left;
 		size_t& updated_position_right = updated_practice.position_right;
 
 		vector<size_t> updated_indexes_left;
-		for (size_t j { 0 }; j < indexes_left.size(); ++j) {
+		for(size_t j { 0 }; j < indexes_left.size(); ++j){
 			const size_t& index = indexes_left[j];
 
-			if (index != removed_index) {
+			if (index != removed_index){
 				updated_indexes_left.push_back((index > removed_index) ? index - 1 : index);
 			}
 			else {
@@ -458,10 +456,10 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 		indexes_left = updated_indexes_left;
 
 		vector<size_t> updated_indexes_right;
-		for (size_t j { 0 }; j < indexes_right.size(); ++j) {
+		for(size_t j { 0 }; j < indexes_right.size(); ++j){
 			const size_t& index = indexes_right[j];
 
-			if (index != removed_index) {
+			if (index != removed_index){
 				updated_indexes_right.push_back((index > removed_index) ? index - 1 : index);
 			}
 			else {
@@ -478,14 +476,14 @@ Practice update_practice(const Practice& practice, const Resume& resume, const D
 
 	if(!resume.indexes_left.empty() && (dictionary_size > indexes_left_size)){
 		const size_t new_words = dictionary_size - indexes_left_size;
-		for (size_t i { 0 }; i < new_words; ++i){
+		for(size_t i { 0 }; i < new_words; ++i){
 			indexes_left.push_back(indexes_left_size + i);
 		}
 	}
 
 	if(!resume.indexes_right.empty() && (dictionary_size > indexes_right_size)){
 		const size_t new_words = dictionary_size - indexes_right_size;
-		for (size_t i { 0 }; i < new_words; ++i){
+		for(size_t i { 0 }; i < new_words; ++i){
 			indexes_right.push_back(indexes_right_size + i);
 		}
 	}
@@ -508,16 +506,16 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 	const vector<size_t>& removed = dictionary.removed;
 
 	// removes words
-	for(size_t i { 0 }; i < removed.size(); ++i) {
+	for(size_t i { 0 }; i < removed.size(); ++i){
 		const size_t& removed_index = removed[i];
 		size_t& updated_position_left = updated_resume.position_left;
 		size_t& updated_position_right = updated_resume.position_right;
 
 		vector<size_t> updated_indexes_left;
-		for (size_t j { 0 }; j < indexes_left.size(); ++j) {
+		for(size_t j { 0 }; j < indexes_left.size(); ++j){
 			const size_t& index = indexes_left[j];
 
-			if (index != removed_index) {
+			if (index != removed_index){
 				updated_indexes_left.push_back((index > removed_index) ? index - 1 : index);
 			}
 			else {
@@ -527,10 +525,10 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 		indexes_left = updated_indexes_left;
 
 		vector<size_t> updated_indexes_right;
-		for (size_t j { 0 }; j < indexes_right.size(); ++j) {
+		for(size_t j { 0 }; j < indexes_right.size(); ++j){
 			const size_t& index = indexes_right[j];
 
-			if (index != removed_index) {
+			if (index != removed_index){
 				updated_indexes_right.push_back((index > removed_index) ? index - 1 : index);
 			}
 			else {
@@ -547,14 +545,14 @@ Resume update_resume(const Resume& resume, const Dictionary& dictionary){
 
 	if(!indexes_left.empty() && (dictionary_size > indexes_left_size)){
 		const size_t new_words = dictionary_size - indexes_left_size;
-		for (size_t i { 0 }; i < new_words; ++i){
+		for(size_t i { 0 }; i < new_words; ++i){
 			indexes_left.push_back(indexes_left_size + i);
 		}
 	}
 
 	if(!indexes_right.empty() && (dictionary_size > indexes_right_size)){
 		const size_t new_words = dictionary_size - indexes_right_size;
-		for (size_t i { 0 }; i < new_words; ++i){
+		for(size_t i { 0 }; i < new_words; ++i){
 			indexes_right.push_back(indexes_right_size + i);
 		}
 	}
@@ -625,12 +623,12 @@ void update_dictionary_file()
 {
 	fstream source(dictionary_filename, ios_base::in | ios_base::binary);
 
-	if(source.is_open()) {
+	if(source.is_open()){
 		fstream destination(temporary_filename, ios_base::out | ios_base::binary);
 
-		if (destination.is_open()) {
-			for (string word; getline(source, word);) {
-				if (word != empty_line) {
+		if (destination.is_open()){
+			for(string word; getline(source, word);){
+				if (word != empty_line){
 					destination << word << newline;
 				}
 				else source >> ws;
@@ -676,7 +674,7 @@ void write_elements(InputIterator first, const InputIterator last, const string&
     if(file.is_open()){
         if(first == last) file << period;
         else{
-            for (; first != last; ++first){
+            for(; first != last; ++first){
                 file << *first << ((first + 1 != last) ? delimiter : period);
             }
         }
@@ -722,7 +720,7 @@ vector<size_t> get_int_distribution(const size_t& size)
 // returns a vector of unique integers ranging from 0 to size-1
 {
     vector<size_t> indexes;
-    for (size_t i = 0; i < size; indexes.push_back(i++));
+    for(size_t i = 0; i < size; indexes.push_back(i++));
 
     return indexes;
 }
